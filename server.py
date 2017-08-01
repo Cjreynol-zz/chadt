@@ -12,8 +12,8 @@ class Server(object):
         self.listener = self.create_listen_socket(("localhost", self.port))
 
         self.running = False
-        self.receiver_thread = create_thread(self.listen)
-        self.relay_thread = create_thread(self.relay_messages)
+        self.receiver_thread = self.create_thread(self.listen)
+        self.relay_thread = self.create_thread(self.relay_messages)
 
         log.info("Server created with port {}.".format(self.port))
 
@@ -24,10 +24,14 @@ class Server(object):
 
         log.info("Server started.")
 
+    def stop_server(self):
+        self.running = False
+        self.listener.close()
+
     def relay_messages(self):
         log.info("Message relaying started.")
         while self.running:
-             for address, client in self.clients.items():
+            for address, client in self.clients.items():
                 if client.complete:
                     try:
                         message = client.get_message_from()
@@ -36,7 +40,6 @@ class Server(object):
 
                     except BlockingIOError:
                         log.debug("No message from {}.".format(address))
-
             sleep(1)
 
     
@@ -52,17 +55,30 @@ class Server(object):
         while self.running:
             connection = self.listener.accept()
             log.info("New Connection.")
-            new_socket, address = (connection[0], connection[1])
+            self.process_connection(connection)
 
-            if address not in self.clients:
-                self.clients[address] = ClientConnection(address, new_socket)
-                log.debug("Connection is new client at address {}.".format(address))
+    def process_connection(self, connection):
+        new_socket = connection[0]
+        address = connection[1]
 
-            else:
-                new_socket.setblocking(False)
-                self.clients[address].client_transmitter(new_socket)
-                self.clients[address].complete = True
-                log.debug("Connection is existing client at address {}.".format(address))
+        host, port = address
+        username = new_socket.recv(ClientConnection.MESSAGE_BUFFER_SIZE).decode()
+        identifier = (username, host)
+
+        if identifier not in self.clients:
+            self.add_client(username, address, identifier, new_socket)
+        else:
+            self.update_client(username, address, identifier, new_socket)
+
+    def add_client(self, username, address, identifier, socket):
+        self.clients[identifier] = ClientConnection(username, address, socket)
+        log.debug("Connection is new client {} at address {}.".format(username, address))
+
+    def update_client(self, username, address, identifier, socket):
+        socket.setblocking(False)
+        self.clients[identifier].client_transmitter = socket
+        self.clients[identifier].complete = True
+        log.debug("Connection is existing client {} at address {}.".format(username, address))
 
     def create_listen_socket(self, address):
         s = socket()
@@ -78,7 +94,8 @@ class ClientConnection(object):
 
     MESSAGE_BUFFER_SIZE = 4096
 
-    def __init__(self, address, receiver_socket, transmitter_socket=None):
+    def __init__(self, username, address, receiver_socket, transmitter_socket=None):
+        self.username = username
         self.address = address
         self.client_receiver = receiver_socket
         self.client_transmitter = transmitter_socket

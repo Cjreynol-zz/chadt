@@ -8,26 +8,27 @@ class Client(object):
 
     SERVER_ADDRESS = ("localhost", 36000)
 
-    def __init__(self, host, receive_port, transmit_port):
+    def __init__(self, username, host, receive_port, transmit_port):
+        self.username = username
         self.host = host
         self.receive_port = receive_port
         self.transmit_port = transmit_port
         self.message_queue = []
 
-        self.receiver = self.create_socket((host, receive_port))
+        self.receiver = self.create_connection((host, receive_port))
         log.info("Client receiver is connected.")
-        self.transmitter = self.create_socket((host, transmit_port))
+        self.transmitter = self.create_connection((host, transmit_port))
         log.info("Client transmitter is connected.")
 
         self.running = False
-        self.receiver_thread = create_thread(self.receive)
-        self.transmitter_thread = create_thread(self.transmit)
+        self.receiver_thread = self.create_thread(self.receive)
+        self.transmitter_thread = self.create_thread(self.transmit)
         log.info("Client created with host({}), receive_port({}), transmit_port({})".format(self.host, self.receive_port, self.transmit_port))
 
     def start_client(self): 
         self.running = True
-        self.listen_thread.start()
-        self.send_thread.start()
+        self.receiver_thread.start()
+        self.transmitter_thread.start()
 
         log.info("Client started.")
         while self.running:
@@ -37,7 +38,7 @@ class Client(object):
 
     def receive(self):
         while self.running:
-            message = self.listen_socket.recv(4096)
+            message = self.receiver.recv(4096)
             message = message.decode()
             log.debug("New message received from server: {}".format(message))
             print("\n" + message + "\n>>>")
@@ -46,14 +47,15 @@ class Client(object):
         while self.running:
             if len(self.message_queue) > 0:
                 log.info("Message sent to server.")
-                self.send_socket.sendall(self.message_queue.pop(0))
+                self.transmitter.sendall(self.message_queue.pop(0))
             else:
                 sleep(1)
 
-    def create_socket(self, address):
+    def create_connection(self, address):
         s = socket()
         s.bind(address)
         s.connect(Client.SERVER_ADDRESS)
+        s.sendall(bytes(self.username, "utf-8"))
         return s
 
     def create_thread(self, target_func):
