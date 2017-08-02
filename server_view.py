@@ -8,6 +8,7 @@ class ServerView:
         self.add_port_selection_widgets()
         self.list_box = None
 
+    def start_mainloop(self):
         tk.mainloop()
 
     def initialize_window(self):
@@ -32,8 +33,8 @@ class ServerView:
     def add_control_widgets(self):
         l = tk.Label(self.root, text="Connected Clients:")
 
-        self.list_box = tk.ListBox(self.root)
-        sb = tk.ScrollBar(self.root, command=lb.yview)
+        self.list_box = tk.Listbox(self.root)
+        sb = tk.Scrollbar(self.root, command=self.list_box.yview)
 
         l.pack()
         self.list_box.pack()

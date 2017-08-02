@@ -6,7 +6,7 @@ import logging as log
 
 class Client(object):
 
-    SERVER_ADDRESS = ("localhost", 36000)
+    SERVER_ADDRESS = ("localhost", 50000)
 
     def __init__(self, username, host, receive_port, transmit_port):
         self.username = username

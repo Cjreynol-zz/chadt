@@ -7,6 +7,7 @@ class ServerViewController:
     def __init__(self):
         self.server = None
         self.view = ServerView(self)
+        self.view.start_mainloop()
 
     def confirm_button(self, entry_widget):
         def f():
@@ -16,6 +17,7 @@ class ServerViewController:
 
     def create_server(self, port_num):
         self.server = Server(port_num)
+        self.server.start_server()
         self.server.clients.observers.append(self.client_list_update)
 
     def start_main_window(self):

@@ -11,6 +11,7 @@ class ObservedKeyListDict(MutableMapping):
 
     def __setitem__(self, key, value):
         if key not in self._dict:
+            print("add" + str(key))
             self.notify_observers()
         self._dict[key] = value
 

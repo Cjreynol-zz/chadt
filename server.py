@@ -8,7 +8,7 @@ from observed_key_list_dict import ObservedKeyListDict
 
 class Server(object):
     
-    def __init__(self, port = 36000):
+    def __init__(self, port = 50000):
         self.port = port
         self.clients = ObservedKeyListDict()
         self.listener = self.create_listen_socket(("localhost", self.port))
@@ -36,12 +36,14 @@ class Server(object):
                 if client.complete:
                     try:
                         message = client.get_message_from()
-                        log.info("Message received.")
-                        log.debug("Received message from {}: {}".format(address, message))
-                        self.relay_message(message, address)
+                        if len(message) > 0:
+                            log.info("Message received.")
+                            log.debug("Received message from {}: {}".format(address, message))
+                            self.relay_message(message, address)
 
                     except BlockingIOError:
-                        log.debug("No message from {}.".format(address))
+                        pass
+                        #log.debug("No message from {}.".format(address))
             sleep(1)
 
     def relay_message(self, message, sender):
