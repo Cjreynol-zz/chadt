@@ -32,16 +32,21 @@ class Client(object):
 
         log.info("Client started.")
         while self.running:
-            message = input(">>>")
+            message = input(">>> ")
             self.message_queue.append(bytes(message, "utf-8"))
             log.debug("New message added to queue: {}".format(message))
+
+    def stop_client(self):
+        self.running = False
+        self.receiver.close()
+        self.transmitter.close()
 
     def receive(self):
         while self.running:
             message = self.receiver.recv(4096)
             message = message.decode()
             log.debug("New message received from server: {}".format(message))
-            print("\n" + message + "\n>>>")
+            print("\n" + message + "\n>>> ", end='')
 
     def transmit(self):
         while self.running:

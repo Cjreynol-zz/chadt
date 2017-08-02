@@ -3,18 +3,19 @@ from socket import socket
 from time import sleep
 import logging as log
 
+from observed_key_list_dict import ObservedKeyListDict
+
 
 class Server(object):
     
     def __init__(self, port = 36000):
         self.port = port
-        self.clients = dict()
+        self.clients = ObservedKeyListDict()
         self.listener = self.create_listen_socket(("localhost", self.port))
 
         self.running = False
         self.receiver_thread = self.create_thread(self.listen)
         self.relay_thread = self.create_thread(self.relay_messages)
-
         log.info("Server created with port {}.".format(self.port))
 
     def start_server(self):
@@ -35,6 +36,7 @@ class Server(object):
                 if client.complete:
                     try:
                         message = client.get_message_from()
+                        log.info("Message received.")
                         log.debug("Received message from {}: {}".format(address, message))
                         self.relay_message(message, address)
 
@@ -42,12 +44,11 @@ class Server(object):
                         log.debug("No message from {}.".format(address))
             sleep(1)
 
-    
-
     def relay_message(self, message, sender):
         for address, client in self.clients.items():
             if sender != address:
                 client.send_message_to(message)
+                log.info("Message sent.")
                 log.debug("Sent message to {}.".format(address))
 
     def listen(self):
@@ -66,15 +67,15 @@ class Server(object):
         identifier = (username, host)
 
         if identifier not in self.clients:
-            self.add_client(username, address, identifier, new_socket)
+            self.add_client_connection(username, address, identifier, new_socket)
         else:
-            self.update_client(username, address, identifier, new_socket)
+            self.update_client_connection(username, address, identifier, new_socket)
 
-    def add_client(self, username, address, identifier, socket):
+    def add_client_connection(self, username, address, identifier, socket):
         self.clients[identifier] = ClientConnection(username, address, socket)
         log.debug("Connection is new client {} at address {}.".format(username, address))
 
-    def update_client(self, username, address, identifier, socket):
+    def update_client_connection(self, username, address, identifier, socket):
         socket.setblocking(False)
         self.clients[identifier].client_transmitter = socket
         self.clients[identifier].complete = True
@@ -106,5 +107,4 @@ class ClientConnection(object):
 
     def send_message_to(self, message):
         self.client_receiver.sendall(message)
-
 
