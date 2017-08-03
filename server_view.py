@@ -1,5 +1,6 @@
 import tkinter as tk
 
+
 class ServerView:
 
     def __init__(self, controller):

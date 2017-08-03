@@ -1,10 +1,10 @@
 import logging as log
-from client import Client
+from client_view_controller import ClientViewController
+
 
 def main():
     log.basicConfig(level=log.DEBUG)
-    c = Client("chad2", 50003, 50004)
-    c.start_client()
+    c = ClientViewController()
 
 if __name__ == "__main__":
     main()

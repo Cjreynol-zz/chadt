@@ -48,12 +48,11 @@ class Server(object):
 
     def relay_message(self, message, sender):
         for identifier, client in self.clients.items():
-            if sender != identifier:
-                sender_username = sender[0]
-                labelled_message = bytes(sender_username + ":  ", "utf-8") + message
-                client.send_message_to(labelled_message)
-                log.info("Message sent.")
-                log.debug("Sent message to {}.".format(identifier))
+            sender_username = sender[0]
+            labelled_message = bytes(sender_username + ":  ", "utf-8") + message
+            client.send_message_to(labelled_message)
+            log.info("Message sent.")
+            log.debug("Sent message to {}.".format(identifier))
 
     def listen(self):
         log.info("Connection listening started.")

@@ -7,23 +7,26 @@ import logging as log
 class Client(object):
 
     SERVER_ADDRESS = ("localhost", 50000)
+    CLIENT_HOST = "localhost"
 
-    def __init__(self, username, host, receive_port, transmit_port):
+    def __init__(self, username, receive_port, transmit_port, console_input_mode = True):
         self.username = username
-        self.host = host
         self.receive_port = receive_port
         self.transmit_port = transmit_port
-        self.message_queue = []
+        self.console_input_mode = console_input_mode
 
-        self.receiver = self.create_connection((host, receive_port))
+        self.message_queue = []
+        self.message_output = self.console_output
+
+        self.receiver = self.create_connection((Client.CLIENT_HOST, receive_port))
         log.info("Client receiver is connected.")
-        self.transmitter = self.create_connection((host, transmit_port))
+        self.transmitter = self.create_connection((Client.CLIENT_HOST, transmit_port))
         log.info("Client transmitter is connected.")
 
         self.running = False
         self.receiver_thread = self.create_thread(self.receive)
         self.transmitter_thread = self.create_thread(self.transmit)
-        log.info("Client created with host({}), receive_port({}), transmit_port({})".format(self.host, self.receive_port, self.transmit_port))
+        log.info("Client created with host({}), receive_port({}), transmit_port({})".format(Client.CLIENT_HOST, self.receive_port, self.transmit_port))
 
     def start_client(self): 
         self.running = True
@@ -31,10 +34,8 @@ class Client(object):
         self.transmitter_thread.start()
 
         log.info("Client started.")
-        while self.running:
-            message = input(">>> ")
-            self.message_queue.append(bytes(message, "utf-8"))
-            log.debug("New message added to queue: {}".format(message))
+        if self.console_input_mode:
+            self.console_input()
 
     def stop_client(self):
         self.running = False
@@ -46,7 +47,16 @@ class Client(object):
             message = self.receiver.recv(4096)
             message = message.decode()
             log.debug("New message received from server: {}".format(message))
-            print("\n" + message + "\n>>> ", end='')
+            self.message_output(message)
+    
+    def console_output(self, message):
+        print("\n" + message + "\n>>> ", end='')
+
+    def console_input(self):
+        while self.running:
+            message = input(">>> ")
+            self.message_queue.append(bytes(message, "utf-8"))
+            log.debug("New message added to queue: {}".format(message))
 
     def transmit(self):
         while self.running:
