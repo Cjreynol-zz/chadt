@@ -32,26 +32,28 @@ class Server(object):
     def relay_messages(self):
         log.info("Message relaying started.")
         while self.running:
-            for address, client in self.clients.items():
+            for identifier, client in self.clients.items():
                 if client.complete:
                     try:
                         message = client.get_message_from()
                         if len(message) > 0:
                             log.info("Message received.")
-                            log.debug("Received message from {}: {}".format(address, message))
-                            self.relay_message(message, address)
+                            log.debug("Received message from {}: {}".format(identifier, message))
+                            self.relay_message(message, identifier)
 
                     except BlockingIOError:
                         pass
-                        #log.debug("No message from {}.".format(address))
+                        #log.debug("No message from {}.".format(identifier))
             sleep(1)
 
     def relay_message(self, message, sender):
-        for address, client in self.clients.items():
-            if sender != address:
-                client.send_message_to(message)
+        for identifier, client in self.clients.items():
+            if sender != identifier:
+                sender_username = sender[0]
+                labelled_message = bytes(sender_username + ":  ", "utf-8") + message
+                client.send_message_to(labelled_message)
                 log.info("Message sent.")
-                log.debug("Sent message to {}.".format(address))
+                log.debug("Sent message to {}.".format(identifier))
 
     def listen(self):
         log.info("Connection listening started.")
