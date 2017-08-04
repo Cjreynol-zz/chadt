@@ -3,7 +3,7 @@ from socket import socket
 from time import sleep
 import logging as log
 
-from observed_key_list_dict import ObservedKeyListDict
+from lib.observed_key_list_dict import ObservedKeyListDict
 
 
 class Server(object):

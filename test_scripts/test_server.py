@@ -1,5 +1,5 @@
 import logging as log
-from server import Server
+from server.server import Server
 
 def main():
     log.basicConfig(level=log.DEBUG)

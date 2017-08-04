@@ -1,5 +1,5 @@
-from server import Server
-from server_view import ServerView
+from server.server import Server
+from server.server_view import ServerView
 
 
 class ServerViewController:

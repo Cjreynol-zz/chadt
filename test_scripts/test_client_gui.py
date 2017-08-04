@@ -1,5 +1,5 @@
 import logging as log
-from client_view_controller import ClientViewController
+from client.client_view_controller import ClientViewController
 
 
 def main():

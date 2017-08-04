@@ -1,5 +1,5 @@
 import logging as log
-from client import Client
+from client.client import Client
 
 def main():
     log.basicConfig(level=log.DEBUG)

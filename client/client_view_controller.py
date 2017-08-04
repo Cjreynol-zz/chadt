@@ -1,5 +1,5 @@
-from client import Client
-from client_view import ClientView
+from client.client import Client
+from client.client_view import ClientView
 
 
 class ClientViewController:

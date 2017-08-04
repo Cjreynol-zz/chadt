@@ -1,5 +1,5 @@
 import logging as log
-from server_view_controller import ServerViewController
+from server.server_view_controller import ServerViewController
 
 
 def main():
