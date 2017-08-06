@@ -9,11 +9,8 @@ class ServerView:
         self.add_port_selection_widgets()
         self.list_box = None
 
-    def start_mainloop(self):
-        tk.mainloop()
-
     def initialize_window(self):
-        root = tk.Tk()
+        root = tk.Toplevel()
         root.title("Chadt Server")
         return root
 

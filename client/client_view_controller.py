@@ -6,8 +6,9 @@ class ClientViewController:
     
     def __init__(self):
         self.client = None
+
+    def start_view(self):
         self.view = ClientView(self)
-        self.view.start_mainloop()
 
     def confirm_button(self, username_entry, port_entry1, port_entry2):
         def f():

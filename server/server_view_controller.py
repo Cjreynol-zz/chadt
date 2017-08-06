@@ -6,9 +6,10 @@ class ServerViewController:
 
     def __init__(self):
         self.server = None
-        self.view = ServerView(self)
-        self.view.start_mainloop()
 
+    def start_view(self):
+        self.view = ServerView(self)
+        
     def confirm_button(self, entry_widget):
         def f():
             self.create_server(int(entry_widget.get()))

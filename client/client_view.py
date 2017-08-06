@@ -9,11 +9,8 @@ class ClientView:
         self.add_config_widgets()
         self.text = None
 
-    def start_mainloop(self):
-        tk.mainloop()
-
     def initialize_window(self):
-        root = tk.Tk()
+        root = tk.Toplevel()
         root.title("Chadt Client")
         return root
 
