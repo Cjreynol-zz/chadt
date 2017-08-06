@@ -29,5 +29,8 @@ class ClientViewController:
         self.view.add_chat_widgets()
 
     def send_message_button(self, message_entry):
-        return lambda: self.client.message_queue.append(bytes(message_entry.get(), "utf-8"))
+        def f(event = None):
+	        self.client.message_queue.append(bytes(message_entry.get(), "utf-8"))
+	        self.view.clear_entry_box()
+        return f
 
