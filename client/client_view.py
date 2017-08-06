@@ -8,6 +8,7 @@ class ClientView:
         self.root = self.initialize_window()
         self.add_config_widgets()
         self.text = None
+        self.text_entry = None
 
     def start_mainloop(self):
         tk.mainloop()
@@ -43,12 +44,19 @@ class ClientView:
         for widget in self.root.grid_slaves():
             widget.destroy()
 
+    def clear_entry_box(self):
+        self.text_entry.delete(0, tk.END)
+			
     def add_chat_widgets(self):
         self.text = tk.Text(self.root, height=10, width=80)
         e = tk.Entry(self.root)
         e.insert(0, "Enter messages here")
+		
+        self.text_entry = e
 
         b = tk.Button(self.root, text="Send Message", command=self.controller.send_message_button(e))
+        
+        self.root.bind("<Return>", self.controller.send_message_button(e))
 
         self.text.grid(row=0, column=0)
         e.grid(row=1, column=0)
