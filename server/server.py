@@ -11,7 +11,7 @@ class Server(object):
     def __init__(self, port = 50000):
         self.port = port
         self.clients = ObservedKeyListDict()
-        self.listener = self.create_listen_socket(("localhost", self.port))
+        self.listener = self.create_listen_socket(("", self.port))
 
         self.running = False
         self.receiver_thread = self.create_thread(self.listen)
