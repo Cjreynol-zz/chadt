@@ -6,13 +6,10 @@ import logging as log
 
 class Client(object):
 
-    SERVER_ADDRESS = ("localhost", 50000)
     CLIENT_HOST = "localhost"
 
-    def __init__(self, username, receive_port, transmit_port, server_host = "localhost", server_port = 50000, console_input_mode = True):
+    def __init__(self, username, server_host, server_port, console_input_mode = True):
         self.username = username
-        self.receive_port = receive_port
-        self.transmit_port = transmit_port
         self.console_input_mode = console_input_mode
         self.server_host = server_host
         self.server_port = server_port
@@ -20,15 +17,15 @@ class Client(object):
         self.message_queue = []
         self.message_output = self.console_output
 
-        self.receiver = self.create_connection((Client.CLIENT_HOST, receive_port))
+        self.receiver = self.create_connection()
         log.info("Client receiver is connected.")
-        self.transmitter = self.create_connection((Client.CLIENT_HOST, transmit_port))
+        self.transmitter = self.create_connection()
         log.info("Client transmitter is connected.")
 
         self.running = False
         self.receiver_thread = self.create_thread(self.receive)
         self.transmitter_thread = self.create_thread(self.transmit)
-        log.info("Client created with host({}), receive_port({}), transmit_port({})".format(Client.CLIENT_HOST, self.receive_port, self.transmit_port))
+        log.info("Client created.")
 
     def start_client(self): 
         self.running = True
@@ -68,9 +65,8 @@ class Client(object):
             else:
                 sleep(1)
 
-    def create_connection(self, address):
+    def create_connection(self):
         s = socket()
-        s.bind(address)
         s.connect((self.server_host, self.server_port))
         s.sendall(bytes(self.username, "utf-8"))
         return s

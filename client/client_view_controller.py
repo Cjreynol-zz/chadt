@@ -10,14 +10,14 @@ class ClientViewController:
     def start_view(self):
         self.view = ClientView(self)
 
-    def confirm_button(self, username_entry, port_entry1, port_entry2, server_host_entry, server_port_entry):
+    def confirm_button(self, username_entry, server_host_entry, server_port_entry):
         def f():
-            self.create_client(username_entry.get(), int(port_entry1.get()), int(port_entry2.get()), server_host_entry.get(), int(server_port_entry.get()))
+            self.create_client(username_entry.get(), server_host_entry.get(), int(server_port_entry.get()))
             self.start_main_window()
         return f
 
-    def create_client(self, username, receive_port, transmit_port, server_host, server_port):
-        self.client = Client(username, receive_port, transmit_port, server_host, server_port, False)
+    def create_client(self, username, server_host, server_port):
+        self.client = Client(username, server_host, server_port, False)
         self.client.start_client()
         self.client.message_output = self.display_new_message
 
