@@ -6,14 +6,18 @@ class ClientViewController:
     
     def __init__(self):
         self.client = None
+        self.view = None
 
     def start_view(self):
         self.view = ClientView(self)
 
     def confirm_button(self, username_entry, server_host_entry, server_port_entry):
         def f():
-            self.create_client(username_entry.get(), server_host_entry.get(), int(server_port_entry.get()))
-            self.start_main_window()
+            if not self.is_valid_port_num(server_port_entry.get()):
+                self.view.not_an_int_warning()
+            else:
+                self.create_client(username_entry.get(), server_host_entry.get(), int(server_port_entry.get()))
+                self.start_main_window()
         return f
 
     def create_client(self, username, server_host, server_port):
@@ -34,3 +38,13 @@ class ClientViewController:
 	        self.view.clear_entry_box()
         return f
 
+    def is_valid_port_num(self, num):
+        return_value = True
+        try:
+            num = int(num)
+            if num < 1024 or num > 65535:
+                return_value = False
+        except ValueError:
+            return_value = False
+
+        return return_value

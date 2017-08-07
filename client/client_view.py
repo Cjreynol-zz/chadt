@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.messagebox as tkmb
 
 
 class ClientView:
@@ -62,3 +63,6 @@ class ClientView:
 
     def display_new_message(self, message):
         self.text.insert(tk.END, message+"\n")
+
+    def not_an_int_warning(self):
+        tkmb.showwarning("Invalid value", "Port selection entry is not an integer in port range(1024-65535).")

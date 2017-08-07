@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.messagebox as tkmb
 
 
 class ServerView:
@@ -42,3 +43,6 @@ class ServerView:
         self.list_box.delete(0, tk.END)
         for item in items:
             self.list_box.insert(tk.END, item)
+
+    def not_an_int_warning(self):
+        tkmb.showwarning("Invalid value", "Port selection entry is not an integer in port range(1024-65535).")
