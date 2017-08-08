@@ -36,6 +36,8 @@ class ClientView(ChadtView):
         self.text = tk.Text(self.root, height=10, width=80)
         self.text.bind("<Key>", lambda x: "break") 
         # this^ bind effectively makes the text widget read-only
+        scroll = tk.Scrollbar(self.root, command=self.text.yview)
+        self.text["yscrollcommand"] = scroll.set
 
         self.text_entry = tk.Entry(self.root)
         self.text_entry.insert(0, "Enter messages here")
@@ -44,11 +46,13 @@ class ClientView(ChadtView):
         b = tk.Button(self.root, text="Send Message", command=self.controller.send_message_button(self.text_entry))
         
         self.text.grid(row=0, column=0)
+        scroll.grid(row=0, column=1)
         self.text_entry.grid(row=1, column=0)
         b.grid(row=1, column=1)
 
     def display_new_message(self, message):
         self.text.insert(tk.END, message+"\n")
+        self.text.see(tk.END)   # "scrolls" to latest entry
 
     def clear_entry_box(self):
         self.text_entry.delete(0, tk.END)
