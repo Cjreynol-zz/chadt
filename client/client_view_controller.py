@@ -19,15 +19,19 @@ class ClientViewController(ChadtViewController):
         return f
 
     def create_client(self, username, server_host, server_port):
-        self.client = Client(username, server_host, server_port, False)
+        self.client = Client(username, server_host, server_port, self.display_new_message)
         self.client.start_client()
-        self.client.message_output = self.display_new_message
 
     def display_new_message(self, message):
         self.view.display_new_message(message)
 
     def send_message_button(self, message_entry):
         def f(event = None):
-	        self.client.message_queue.append(bytes(message_entry.get(), "utf-8"))
-	        self.view.clear_entry_box()
+            self.client.add_message_to_queue(message_entry.get())
+            self.view.clear_entry_box()
         return f
+
+    def quit(self):
+        if self.client is not None:
+            self.client.stop_client()
+        self.view.quit()

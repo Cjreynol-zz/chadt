@@ -21,7 +21,12 @@ class ServerViewController(ChadtViewController):
     def create_server(self, port_num):
         self.server = Server(port_num)
         self.server.start_server()
-        self.server.clients.observers.append(self.client_list_update)
+        self.server.add_client_list_observer(self.client_list_update)
 
     def client_list_update(self):
         self.view.update_list_box(self.server.clients.keys())
+
+    def quit(self):
+        if self.server is not None:
+            self.server.stop_server()
+        self.view.quit()

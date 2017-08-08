@@ -14,15 +14,12 @@ class Server(object):
         self.listener = self.create_listen_socket(("", self.port))
 
         self.running = False
-        self.receiver_thread = self.create_thread(self.listen)
-        self.relay_thread = self.create_thread(self.relay_messages)
         log.info("Server created with port {}.".format(self.port))
 
     def start_server(self):
         self.running = True
-        self.receiver_thread.start()
-        self.relay_thread.start()
-
+        Thread(target = self.listen).start()
+        Thread(target = self.relay_messages).start()
         log.info("Server started.")
 
     def stop_server(self):
@@ -43,7 +40,6 @@ class Server(object):
 
                     except BlockingIOError:
                         pass
-                        #log.debug("No message from {}.".format(identifier))
             sleep(1)
 
     def relay_message(self, message, sender):
@@ -90,8 +86,8 @@ class Server(object):
         s.listen()
         return s
     
-    def create_thread(self, target_func):
-        return Thread(target = target_func)
+    def add_client_list_observer(self, observer):
+        self.clients.add_observer(observer)
     
 
 class ClientConnection(object):

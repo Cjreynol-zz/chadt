@@ -32,3 +32,6 @@ class ObservedKeyListDict(MutableMapping):
     def notify_observers(self):
         for observer in self.observers:
             observer()
+
+    def add_observer(self, observer):
+        self.observers.append(observer)

@@ -6,16 +6,13 @@ import logging as log
 
 class Client(object):
 
-    CLIENT_HOST = "localhost"
-
-    def __init__(self, username, server_host, server_port, console_input_mode = True):
+    def __init__(self, username, server_host, server_port, output_func):
         self.username = username
-        self.console_input_mode = console_input_mode
         self.server_host = server_host
         self.server_port = server_port
 
         self.message_queue = []
-        self.message_output = self.console_output
+        self.message_output = output_func
 
         self.receiver = self.create_connection()
         log.info("Client receiver is connected.")
@@ -23,18 +20,13 @@ class Client(object):
         log.info("Client transmitter is connected.")
 
         self.running = False
-        self.receiver_thread = self.create_thread(self.receive)
-        self.transmitter_thread = self.create_thread(self.transmit)
         log.info("Client created.")
 
     def start_client(self): 
         self.running = True
-        self.receiver_thread.start()
-        self.transmitter_thread.start()
-
+        Thread(target = self.receive).start()
+        Thread(target = self.transmit).start()
         log.info("Client started.")
-        if self.console_input_mode:
-            self.console_input()
 
     def stop_client(self):
         self.running = False
@@ -48,15 +40,6 @@ class Client(object):
             log.debug("New message received from server: {}".format(message))
             self.message_output(message)
     
-    def console_output(self, message):
-        print("\n" + message + "\n>>> ", end='')
-
-    def console_input(self):
-        while self.running:
-            message = input(">>> ")
-            self.message_queue.append(bytes(message, "utf-8"))
-            log.debug("New message added to queue: {}".format(message))
-
     def transmit(self):
         while self.running:
             if len(self.message_queue) > 0:
@@ -71,6 +54,5 @@ class Client(object):
         s.sendall(bytes(self.username, "utf-8"))
         return s
 
-    def create_thread(self, target_func):
-        return Thread(target = target_func)
-
+    def add_message_to_queue(self, message):
+        self.message_queue.append(bytes(message, "utf-8"))

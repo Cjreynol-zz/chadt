@@ -10,6 +10,7 @@ class ChadtView:
     def initialize_root(self, window_title):
         root = Toplevel()
         root.title(window_title)
+        root.protocol("WM_DELETE_WINDOW", self.controller.quit)
         return root
 
     def clear_widgets(self):
@@ -31,3 +32,6 @@ class ChadtView:
 
     def add_main_widgets(self):
         raise NotImplementedError("Needs to be implemented.")
+
+    def quit(self):
+        self.root.destroy()
