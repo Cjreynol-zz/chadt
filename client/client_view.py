@@ -1,20 +1,13 @@
 import tkinter as tk
-import tkinter.messagebox as tkmb
+from lib.chadt_view import ChadtView
 
 
-class ClientView:
+class ClientView(ChadtView):
 
     def __init__(self, controller):
-        self.controller = controller
-        self.root = self.initialize_window()
-        self.add_config_widgets()
+        super().__init__("Chadt Client", controller)
         self.text = None
         self.text_entry = None
-
-    def initialize_window(self):
-        root = tk.Toplevel()
-        root.title("Chadt Client")
-        return root
 
     def add_config_widgets(self):
         l1 = tk.Label(self.root, text="Choose Username:")
@@ -39,30 +32,23 @@ class ClientView:
 
         b.grid(row=3, column=0)
 
-    def clear_window(self):
-        for widget in self.root.grid_slaves():
-            widget.destroy()
-
-    def clear_entry_box(self):
-        self.text_entry.delete(0, tk.END)
-			
-    def add_chat_widgets(self):
+    def add_main_widgets(self):
         self.text = tk.Text(self.root, height=10, width=80)
-        e = tk.Entry(self.root)
-        e.insert(0, "Enter messages here")
+        self.text.bind("<Key>", lambda x: "break") 
+        # this^ bind effectively makes the text widget read-only
+
+        self.text_entry = tk.Entry(self.root)
+        self.text_entry.insert(0, "Enter messages here")
+        self.root.bind("<Return>", self.controller.send_message_button(self.text_entry))
 		
-        self.text_entry = e
-
-        b = tk.Button(self.root, text="Send Message", command=self.controller.send_message_button(e))
+        b = tk.Button(self.root, text="Send Message", command=self.controller.send_message_button(self.text_entry))
         
-        self.root.bind("<Return>", self.controller.send_message_button(e))
-
         self.text.grid(row=0, column=0)
-        e.grid(row=1, column=0)
+        self.text_entry.grid(row=1, column=0)
         b.grid(row=1, column=1)
 
     def display_new_message(self, message):
         self.text.insert(tk.END, message+"\n")
 
-    def not_an_int_warning(self):
-        tkmb.showwarning("Invalid value", "Port selection entry is not an integer in port range(1024-65535).")
+    def clear_entry_box(self):
+        self.text_entry.delete(0, tk.END)
