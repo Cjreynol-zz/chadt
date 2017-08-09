@@ -1,5 +1,5 @@
 import tkinter as tk
-from lib.chadt_view import ChadtView
+from chadt.chadt_view import ChadtView
 
 
 class ServerView(ChadtView):

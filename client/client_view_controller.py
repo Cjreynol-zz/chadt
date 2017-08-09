@@ -1,6 +1,6 @@
 from client.client import Client
 from client.client_view import ClientView
-from lib.chadt_view_controller import ChadtViewController
+from chadt.chadt_view_controller import ChadtViewController
 
 
 class ClientViewController(ChadtViewController):

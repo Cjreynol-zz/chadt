@@ -1,6 +1,6 @@
 from server.server import Server
 from server.server_view import ServerView
-from lib.chadt_view_controller import ChadtViewController
+from chadt.chadt_view_controller import ChadtViewController
 
 
 class ServerViewController(ChadtViewController):
