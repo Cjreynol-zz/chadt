@@ -4,27 +4,30 @@ from time import sleep
 import logging as log
 
 from lib.observed_key_list_dict import ObservedKeyListDict
+from server.client_connection import ClientConnection
+from server.listener import Listener
 
 
 class Server(object):
     
     def __init__(self, port = 50000):
-        self.port = port
         self.clients = ObservedKeyListDict()
-        self.listener = self.create_listen_socket(("", self.port))
+        self.new_connections = []
+        self.listener = Listener(self.new_connections, port)
 
         self.running = False
-        log.info("Server created with port {}.".format(self.port))
+        log.info("Server created listening at port {}.".format(port))
 
     def start_server(self):
         self.running = True
-        Thread(target = self.listen).start()
+        Thread(target = self.process_connections).start()
         Thread(target = self.relay_messages).start()
+        self.listener.start_listening()
         log.info("Server started.")
 
     def stop_server(self):
         self.running = False
-        self.listener.close()
+        self.listener.stop_listening()
 
     def relay_messages(self):
         log.info("Message relaying started.")
@@ -50,18 +53,17 @@ class Server(object):
             log.info("Message sent.")
             log.debug("Sent message to {}.".format(identifier))
 
-    def listen(self):
-        log.info("Connection listening started.")
+    def process_connections(self):
         while self.running:
-            connection = self.listener.accept()
-            log.info("New Connection.")
-            self.process_connection(connection)
+            if len(self.new_connections) > 0:
+                self.process_connection(self.new_connections.pop(0))
+            sleep(1)
 
     def process_connection(self, connection):
         new_socket = connection[0]
         address = connection[1]
-
         host, port = address
+
         username = new_socket.recv(ClientConnection.MESSAGE_BUFFER_SIZE).decode()
         identifier = (username, host)
 
@@ -79,31 +81,6 @@ class Server(object):
         self.clients[identifier].client_transmitter = socket
         self.clients[identifier].complete = True
         log.debug("Connection is existing client {} at address {}.".format(username, address))
-
-    def create_listen_socket(self, address):
-        s = socket()
-        s.bind(address)
-        s.listen()
-        return s
     
     def add_client_list_observer(self, observer):
         self.clients.add_observer(observer)
-    
-
-class ClientConnection(object):
-
-    MESSAGE_BUFFER_SIZE = 4096
-
-    def __init__(self, username, address, receiver_socket, transmitter_socket=None):
-        self.username = username
-        self.address = address
-        self.client_receiver = receiver_socket
-        self.client_transmitter = transmitter_socket
-        self.complete = False
-
-    def get_message_from(self):
-        return self.client_transmitter.recv(ClientConnection.MESSAGE_BUFFER_SIZE)
-
-    def send_message_to(self, message):
-        self.client_receiver.sendall(message)
-

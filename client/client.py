@@ -43,8 +43,8 @@ class Client(object):
     def transmit(self):
         while self.running:
             if len(self.message_queue) > 0:
-                log.info("Message sent to server.")
                 self.transmitter.sendall(self.message_queue.pop(0))
+                log.info("Message sent to server.")
             else:
                 sleep(1)
 
