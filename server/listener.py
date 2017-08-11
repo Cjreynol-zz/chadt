@@ -1,14 +1,15 @@
 from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
-from threading import Thread
 
-from chadt.connection_status import ConnectionStatus
+from chadt.chadt_component import ChadtComponent
 
-class Listener:
+
+class Listener(ChadtComponent):
     
     def __init__(self, server_connections, listening_port):
         self.server_connections = server_connections
         self.listening_socket = self.initialize_socket(listening_port)
-        self.status = ConnectionStatus.STOPPED
+
+        super().__init__()
 
     def initialize_socket(self, port):
         s = socket()
@@ -18,30 +19,18 @@ class Listener:
         s.listen()
         return s
 
-    def start_listening(self):
-        if self.status == ConnectionStatus.STOPPED:
-            self.status = ConnectionStatus.RUNNING
-            Thread(target = self.listen).start()
-        elif self.status == ConnectionStatus.STOPPING:
-            raise RuntimeError("Listener is still stopping, cannot restart yet.")
-
-    def stop_listening(self):
-        if self.status == ConnectionStatus.RUNNING:
-            self.status = ConnectionStatus.STOPPING
+    def start(self):
+        super().start(self.listen)
 
     def shutdown(self):
-        if self.status == ConnectionStatus.RUNNING:
-            self.stop_listening()
-        self.listening_socket.close()
+        super().shutdown(self.listening_socket)
 
     def listen(self):
-        while self.status == ConnectionStatus.RUNNING:
-            try:
-                new_connection = self.listening_socket.accept()
-                self.forward_connection(new_connection)
-            except timeout:
-                pass
-        self.status = ConnectionStatus.STOPPED
+        try:
+            new_connection = self.listening_socket.accept()
+            self.forward_connection(new_connection)
+        except timeout:
+            pass
 
     def forward_connection(self, new_connection):
         self.server_connections.append(new_connection)
