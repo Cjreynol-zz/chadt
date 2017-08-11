@@ -8,19 +8,27 @@ message - length
 """
 
 
-from enum import Enum
 from struct import pack, unpack
+
+from chadt.message_type import MessageType
 
 
 class Message:
+
+    HEADER_LENGTH = 20
+    SENDER_MAX_LENGTH = 16
     
     @staticmethod
-    def bytes_to_message(array):
-        version, message_type, sender, length = unpack("BB16sH", array[:20])
-        message = [20:].decode("utf-8")
+    def bytes_to_message(byte_array):
+        version, message_type, sender, length = unpack("BB" + str(Message.SENDER_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
+        message = byte_array[Message.HEADER_LENGTH:].decode("utf-8")
         return Message(message, sender, version, message_type)
+
+    @staticmethod
+    def get_header(byte_array):
+        return unpack("BB" + str(Message.SENDER_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
     
-    def __init__(self, message, sender, version=0, message_type=MessageType.TEXT):
+    def __init__(self, message, sender, message_type = MessageType.TEXT, version = 0):
         self.message = message
         self.length = len(message)
         self.sender = self.format_sender(sender)
@@ -28,17 +36,12 @@ class Message:
         self.message_type = message_type
 
     def make_bytes(self):
-        pack_string = "BB16sH" + str(self.length) + "s"
-        data = pack(pack_string, self.version, self.message_type, self.sender, self.length, self.message)
+        pack_string = "BB" + str(Message.SENDER_MAX_LENGTH) + "sH" + str(self.length) + "s"
+        data = pack(pack_string, self.version, int(self.message_type), bytes(self.sender, "utf-8"), self.length, bytes(self.message, "utf-8"))
         return data
 
-    def format_sender(self, sender):
-        if len(sender) > 16:
-            raise RuntimeError("Sender name is too long")
-        return sender.ljust(16)
-
-
-class MessageType(Enum):
-    TEXT = 1
-    CONNECT = 2
-    DISCONNECT = 3
+    def format_sender(self, value):
+        if len(value) > Message.SENDER_MAX_LENGTH:
+            raise RuntimeError("Tried to set sender name greater than max length(" + str(Message.SENDER_MAX_LENGTH) + ")")
+        else:
+            self.sender = value.ljust(Message.SENDER_MAX_LENGTH)
