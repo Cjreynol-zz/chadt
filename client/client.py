@@ -27,7 +27,7 @@ class Client:
 
     def shutdown_client(self):
         self.server_connection.shutdown()
-        log.info("Client shutdown.")
+        log.info("Client shut down.")
 
     def add_message_to_out_queue(self, message):
         self.message_out_queue.append(message)

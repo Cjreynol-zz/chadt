@@ -1,4 +1,5 @@
 from threading import Thread
+from time import sleep
 
 from chadt.component_status import ComponentStatus
 
@@ -19,6 +20,7 @@ class ChadtComponent:
         def f():
             while self.status == ComponentStatus.RUNNING:
                 target_func()
+                sleep(1)
             self.status = ComponentStatus.STOPPED
         return f
 

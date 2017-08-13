@@ -28,5 +28,5 @@ class ServerViewController(ChadtViewController):
 
     def quit(self):
         if self.server is not None:
-            self.server.stop_server()
+            self.server.shutdown_server()
         self.view.quit()

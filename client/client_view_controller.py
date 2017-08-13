@@ -37,5 +37,5 @@ class ClientViewController(ChadtViewController):
 
     def quit(self):
         if self.client is not None:
-            self.client.stop_client()
+            self.client.shutdown_client()
         self.view.quit()
