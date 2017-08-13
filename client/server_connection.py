@@ -1,6 +1,6 @@
 from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
 
-from chadt._chadt_component import ChadtComponent
+from chadt.chadt_component import ChadtComponent
 from chadt.message import Message
 from chadt.message_type import MessageType
 
@@ -19,7 +19,7 @@ class ServerConnection(ChadtComponent):
         super().__init__()
 
     def start(self):
-        super().start(transceive)
+        super().start(self.transceive)
 
     def transceive(self):
         self.receive_messages()
@@ -49,8 +49,8 @@ class ServerConnection(ChadtComponent):
         self.client_in_queue.append(message)
 
     def pre_startup(self, username, server_host, server_port):
-        self.transceiver = create_socket()
-        self.connect_socket_to_server(username, server_host, server_port)
+        self.transceiver = self.create_socket()
+        self.connect_socket(username, server_host, server_port)
         self.transceiver.settimeout(2)
 
     def create_socket(self):
@@ -64,6 +64,11 @@ class ServerConnection(ChadtComponent):
         self.transceiver.sendall(username_request.make_bytes())
 
         response = self.transceiver.recv(Message.HEADER_LENGTH)
-        message_type = Message.get_header(response)[1]
-        if message_type == MessageType.USERNAME_REJECTED:
+        message = Message.bytes_to_message(response)
+
+        if message.message_type == MessageType.USERNAME_REJECTED:
             raise RuntimeError("Username rejected, try again.")
+        elif message.message_type == MessageType.USERNAME_ACCEPTED:
+            pass
+        else:
+            raise RuntimeError("Unexpected message type.")

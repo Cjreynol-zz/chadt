@@ -10,7 +10,7 @@ class MessageRelayer(ChadtComponent):
         super().__init__()
 
     def start(self):
-        super().start(relay_messages)
+        super().start(self.relay_messages)
 
     def relay_messages(self):
         if len(self.server_message_queue) > 0:

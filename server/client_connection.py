@@ -24,7 +24,7 @@ class ClientConnection(ChadtComponent):
         super().start(self.transceive)
 
     def shutdown(self):
-        super().shutdown(self.tranceiver)
+        super().shutdown(self.transceiver)
 
     def transceive(self):
         self.receive_messages()

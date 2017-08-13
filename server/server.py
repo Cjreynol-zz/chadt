@@ -16,7 +16,7 @@ class Server:
 
         self.listener = Listener(self.new_connections, port)
         self.processor = ConnectionProcessor(self.new_connections, self.clients, self.server_message_queue)
-        self.message_relayer = Message_Relayer(self.server_message_queue, self.clients)
+        self.message_relayer = MessageRelayer(self.server_message_queue, self.clients)
 
         log.info("Server created listening at port {}.".format(port))
 

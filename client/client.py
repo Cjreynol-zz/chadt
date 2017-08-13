@@ -1,58 +1,36 @@
-from threading import Thread
-from socket import socket
-from time import sleep
 import logging as log
 
+from client.server_connection import ServerConnection
 
-class Client(object):
+from lib.observed_list import ObservedList
 
-    def __init__(self, username, server_host, server_port, output_func):
+
+class Client:
+
+    def __init__(self, username, server_host, server_port):
         self.username = username
-        self.server_host = server_host
-        self.server_port = server_port
 
-        self.message_queue = []
-        self.message_output = output_func
+        self.message_in_queue = ObservedList()
+        self.message_out_queue = []
 
-        self.receiver = self.create_connection()
-        log.info("Client receiver is connected.")
-        self.transmitter = self.create_connection()
-        log.info("Client transmitter is connected.")
+        self.server_connection = ServerConnection(self.username, server_host, server_port, self.message_in_queue, self.message_out_queue)
 
-        self.running = False
         log.info("Client created.")
 
     def start_client(self): 
-        self.running = True
-        Thread(target = self.receive).start()
-        Thread(target = self.transmit).start()
+        self.server_connection.start()
         log.info("Client started.")
 
     def stop_client(self):
-        self.running = False
-        self.receiver.close()
-        self.transmitter.close()
+        self.server_connection.stop()
+        log.info("Client stopped.")
 
-    def receive(self):
-        while self.running:
-            message = self.receiver.recv(4096)
-            message = message.decode()
-            log.debug("New message received from server: {}".format(message))
-            self.message_output(message)
-    
-    def transmit(self):
-        while self.running:
-            if len(self.message_queue) > 0:
-                self.transmitter.sendall(self.message_queue.pop(0))
-                log.info("Message sent to server.")
-            else:
-                sleep(1)
+    def shutdown_client(self):
+        self.server_connection.shutdown()
+        log.info("Client shutdown.")
 
-    def create_connection(self):
-        s = socket()
-        s.connect((self.server_host, self.server_port))
-        s.sendall(bytes(self.username, "utf-8"))
-        return s
+    def add_message_to_out_queue(self, message):
+        self.message_out_queue.append(message)
 
-    def add_message_to_queue(self, message):
-        self.message_queue.append(bytes(message, "utf-8"))
+    def add_message_in_queue_observer(self, observer):
+        self.message_in_queue.add_observer(observer)

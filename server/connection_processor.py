@@ -1,7 +1,8 @@
 from chadt.chadt_component import ChadtComponent
-from chadt.client_connection import ClientConnection
 from chadt.message import Message
 from chadt.message_type import MessageType
+
+from server.client_connection import ClientConnection
 
 
 class ConnectionProcessor(ChadtComponent):
@@ -36,7 +37,9 @@ class ConnectionProcessor(ChadtComponent):
             string_sender = sender.decode()
 
         acceptance = Message("", "server", MessageType.USERNAME_ACCEPTED)
+        socket.sendall(acceptance.make_bytes())
         return string_sender
 
     def add_new_client(self, username, new_connection):
         self.server_client_dict[username] = ClientConnection(username, new_connection, self.server_message_queue)
+        self.server_client_dict[username].start()

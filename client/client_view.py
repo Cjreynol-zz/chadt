@@ -1,4 +1,5 @@
 import tkinter as tk
+
 from chadt.chadt_view import ChadtView
 
 
@@ -52,7 +53,7 @@ class ClientView(ChadtView):
 
     def display_new_message(self, message):
         self.text.insert(tk.END, message+"\n")
-        self.text.see(tk.END)   # "scrolls" to latest entry
+        self.text.see(tk.END)
 
     def clear_entry_box(self):
         self.text_entry.delete(0, tk.END)

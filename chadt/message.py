@@ -22,7 +22,7 @@ class Message:
     def bytes_to_message(byte_array):
         version, message_type, sender, length = unpack("BB" + str(Message.SENDER_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
         message = byte_array[Message.HEADER_LENGTH:].decode("utf-8")
-        return Message(message, sender, version, message_type)
+        return Message(message, sender, MessageType(message_type), version)
 
     @staticmethod
     def get_header(byte_array):
@@ -44,4 +44,4 @@ class Message:
         if len(value) > Message.SENDER_MAX_LENGTH:
             raise RuntimeError("Tried to set sender name greater than max length(" + str(Message.SENDER_MAX_LENGTH) + ")")
         else:
-            self.sender = value.ljust(Message.SENDER_MAX_LENGTH)
+            return value.ljust(Message.SENDER_MAX_LENGTH)

@@ -12,7 +12,7 @@ class ChadtComponent:
         if self.status == ComponentStatus.STOPPED:
             self.status = ComponentStatus.RUNNING
             Thread(target = self.get_run_func(thread_target)).start()
-        elif self.status == ComponentStatus.STOPPING
+        elif self.status == ComponentStatus.STOPPING:
             raise RuntimeError("Component is stopping, cannot restart yet.")
 
     def get_run_func(self, target_func):
