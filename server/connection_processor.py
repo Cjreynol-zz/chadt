@@ -1,3 +1,5 @@
+from socket import SO_REUSEADDR, SOL_SOCKET, timeout
+
 from chadt.chadt_component import ChadtComponent
 from chadt.message import Message
 from chadt.message_type import MessageType
@@ -21,6 +23,8 @@ class ConnectionProcessor(ChadtComponent):
         if len(self.new_connection_list) > 0:
             new_connection = self.new_connection_list.pop(0)[0]
             username = self.negotiate_username(new_connection)
+            new_connection.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+            new_connection.settimeout(2)
             self.add_new_client(username, new_connection)
 
     def negotiate_username(self, socket):

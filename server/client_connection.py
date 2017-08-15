@@ -1,4 +1,4 @@
-from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
+from socket import timeout
 
 from chadt.chadt_component import ChadtComponent
 from chadt.message import Message
@@ -8,17 +8,12 @@ class ClientConnection(ChadtComponent):
 
     def __init__(self, username, socket, server_message_queue):
         self.username = username
-        self.transceiver = self.add_socket(socket)
+        self.transceiver = socket
 
         self.server_message_queue = server_message_queue
         self.client_message_queue = []
         
         super().__init__()
-
-    def add_socket(self, socket):
-        socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        socket.settimeout(2)
-        return socket
 
     def start(self):
         super().start(self.transceive)

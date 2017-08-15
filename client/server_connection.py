@@ -1,4 +1,4 @@
-from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
+from socket import timeout
 
 from chadt.chadt_component import ChadtComponent
 from chadt.message import Message
@@ -9,14 +9,14 @@ class ServerConnection(ChadtComponent):
 
     TRANSCEIVER_TIMEOUT = 0.5
 
-    def __init__(self, username, server_host, server_port, client_in_queue, client_out_queue):
+    def __init__(self, username, socket, client_in_queue, client_out_queue):
         self.username = username
 
         self.client_in_queue = client_in_queue
         self.client_out_queue = client_out_queue
 
-        self.transceiver = None
-        self.pre_startup(username, server_host, server_port)
+        self.transceiver = socket
+        self.transceiver.settimeout(ServerConnection.TRANSCEIVER_TIMEOUT)
 
         super().__init__()
 
@@ -53,28 +53,3 @@ class ServerConnection(ChadtComponent):
     def add_message_to_in_queue(self, byte_array):
         message = Message.bytes_to_message(byte_array)
         self.client_in_queue.append(message)
-
-    def pre_startup(self, username, server_host, server_port):
-        self.transceiver = self.create_socket()
-        self.connect_socket(username, server_host, server_port)
-        self.transceiver.settimeout(ServerConnection.TRANSCEIVER_TIMEOUT)
-
-    def create_socket(self):
-        s = socket()
-        s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        return s
-
-    def connect_socket(self, username, server_host, server_port):
-        self.transceiver.connect((server_host, server_port))
-        username_request = Message("", username, MessageType.USERNAME_REQUEST)
-        self.transceiver.sendall(username_request.make_bytes())
-
-        response = self.transceiver.recv(Message.HEADER_LENGTH)
-        message = Message.bytes_to_message(response)
-
-        if message.message_type == MessageType.USERNAME_REJECTED:
-            raise RuntimeError("Username rejected, try again.")
-        elif message.message_type == MessageType.USERNAME_ACCEPTED:
-            pass
-        else:
-            raise RuntimeError("Unexpected message type.")
