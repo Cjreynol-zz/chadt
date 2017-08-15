@@ -5,6 +5,8 @@ from chadt.component_status import ComponentStatus
 
 
 class ChadtComponent:
+
+    THREAD_SLEEP_TIME = 0.5
     
     def __init__(self):
         self.status = ComponentStatus.STOPPED
@@ -22,7 +24,7 @@ class ChadtComponent:
         def f():
             while self.status == ComponentStatus.RUNNING:
                 target_func()
-                sleep(0.5)
+                sleep(ChadtComponent.THREAD_SLEEP_TIME)
             if self.status == ComponentStatus.STOPPING:
                 self.status = ComponentStatus.STOPPED
             elif self.status == ComponentStatus.SHUTTING_DOWN:

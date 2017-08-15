@@ -7,6 +7,8 @@ from chadt.message_type import MessageType
 
 class ServerConnection(ChadtComponent):
 
+    TRANSCEIVER_TIMEOUT = 0.5
+
     def __init__(self, username, server_host, server_port, client_in_queue, client_out_queue):
         self.username = username
 
@@ -55,7 +57,7 @@ class ServerConnection(ChadtComponent):
     def pre_startup(self, username, server_host, server_port):
         self.transceiver = self.create_socket()
         self.connect_socket(username, server_host, server_port)
-        self.transceiver.settimeout(2)
+        self.transceiver.settimeout(ServerConnection.TRANSCEIVER_TIMEOUT)
 
     def create_socket(self):
         s = socket()
