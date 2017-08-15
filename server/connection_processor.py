@@ -5,8 +5,6 @@ from chadt.chadt_connection import ChadtConnection
 from chadt.message import Message
 from chadt.message_type import MessageType
 
-from server.client_connection import ClientConnection
-
 
 class ConnectionProcessor(ChadtComponent):
     
