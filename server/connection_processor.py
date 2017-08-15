@@ -28,10 +28,10 @@ class ConnectionProcessor(ChadtComponent):
         version, message_type, sender, length = Message.get_header(header)
         string_sender = sender.decode()
         
-        while (message_type == MessageType.USERNAME_REQUEST and 
+        while (message_type == MessageType.USERNAME_REQUEST or 
                 string_sender in self.server_client_dict):
             rejection = Message("", "server", MessageType.USERNAME_REJECTED)
-            socket.sendall(rejection.makebytes())
+            socket.sendall(rejection.make_bytes())
             header = socket.recv(Message.HEADER_LENGTH)
             version, message_type, sender, length = Message.get_header(header)
             string_sender = sender.decode()
