@@ -5,18 +5,19 @@ from chadt.message import Message
 from chadt.message_type import MessageType
 
 
-class ServerConnection(ChadtComponent):
+class ChadtConnection(ChadtComponent):
 
-    TRANSCEIVER_TIMEOUT = 0.5
-
-    def __init__(self, username, socket, client_in_queue, client_out_queue):
+    def __init__(self, username, socket, in_queue, out_queue = None, decode = False):
         self.username = username
-
-        self.client_in_queue = client_in_queue
-        self.client_out_queue = client_out_queue
-
         self.transceiver = socket
-        self.transceiver.settimeout(ServerConnection.TRANSCEIVER_TIMEOUT)
+
+        self.in_queue = in_queue
+        if out_queue is not None:
+            self.out_queue = out_queue
+        else:
+            self.out_queue = []
+
+        self.decode = decode
 
         super().__init__()
 
@@ -31,14 +32,9 @@ class ServerConnection(ChadtComponent):
         self.transmit_messages()
 
     def transmit_messages(self):
-        if len(self.client_out_queue) > 0:
-            message_text = self.client_out_queue.pop(0)
-            bytes_message = self.add_header(message_text)
-            self.transceiver.sendall(bytes_message)
-
-    def add_header(self, message_text):
-        message = Message(message_text, self.username)
-        return message.make_bytes()
+        if len(self.out_queue) > 0:
+            message = self.out_queue.pop(0)
+            self.transceiver.sendall(message)
 
     def receive_messages(self):
         try:
@@ -50,6 +46,10 @@ class ServerConnection(ChadtComponent):
         except timeout:
             pass
 
-    def add_message_to_in_queue(self, byte_array):
-        message = Message.bytes_to_message(byte_array)
-        self.client_in_queue.append(message)
+    def add_message_to_in_queue(self, message):
+        if self.decode:
+            message = Message.bytes_to_message(message)
+        self.in_queue.append(message)
+
+    def add_message_to_out_queue(self, message):
+        self.out_queue.append(message)

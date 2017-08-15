@@ -1,6 +1,7 @@
 from socket import SO_REUSEADDR, SOL_SOCKET, timeout
 
 from chadt.chadt_component import ChadtComponent
+from chadt.chadt_connection import ChadtConnection
 from chadt.message import Message
 from chadt.message_type import MessageType
 
@@ -45,5 +46,5 @@ class ConnectionProcessor(ChadtComponent):
         return string_sender
 
     def add_new_client(self, username, new_connection):
-        self.server_client_dict[username] = ClientConnection(username, new_connection, self.server_message_queue)
+        self.server_client_dict[username] = ChadtConnection(username, new_connection, self.server_message_queue)
         self.server_client_dict[username].start()

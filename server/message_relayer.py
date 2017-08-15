@@ -19,4 +19,4 @@ class MessageRelayer(ChadtComponent):
 
     def add_message_to_client_queues(self, message):
         for key, value in self.server_client_dict.items():
-            value.add_message_to_client_queue(message)
+            value.add_message_to_out_queue(message)

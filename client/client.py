@@ -1,15 +1,17 @@
 import logging as log
 from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
 
+from chadt.chadt_connection import ChadtConnection
 from chadt.message import Message
 from chadt.message_type import MessageType
 
-from client.server_connection import ServerConnection
 
 from lib.observed_list import ObservedList
 
 
 class Client:
+
+    SOCKET_TIMEOUT = 0.5
 
     def __init__(self, username, server_host, server_port):
         self.username = username
@@ -18,7 +20,7 @@ class Client:
         self.message_out_queue = []
 
         socket = self.initialize_connection(self.username, server_host, server_port)
-        self.server_connection = ServerConnection(self.username, socket, self.message_in_queue, self.message_out_queue)
+        self.server_connection = ChadtConnection(self.username, socket, self.message_in_queue, self.message_out_queue, True)
 
         log.info("Client created.")
 
@@ -35,7 +37,7 @@ class Client:
         log.info("Client shut down.")
 
     def add_message_to_out_queue(self, message):
-        self.message_out_queue.append(message)
+        self.message_out_queue.append(Message(message, self.username).make_bytes())
 
     def add_message_in_queue_observer(self, observer):
         self.message_in_queue.add_observer(observer)
@@ -67,3 +69,4 @@ class Client:
             pass
         else:
             raise RuntimeError("Unexpected message type.")
+        socket.settimeout(Client.SOCKET_TIMEOUT)
