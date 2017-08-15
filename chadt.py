@@ -2,14 +2,16 @@ import logging as log
 import tkinter as tk
 from tkinter.messagebox import askokcancel
 
-from server.server_view_controller import ServerViewController
 from client.client_view_controller import ClientViewController
+
+from server.server_view_controller import ServerViewController
 
 
 class LaunchWindow:
 
     def __init__(self):
         self.root = None
+        self.child_controllers = []
 
     def start_window(self):
         self.root = tk.Tk()
@@ -27,14 +29,18 @@ class LaunchWindow:
         
     def quit(self):
         if askokcancel("Quit", "Do you want to quit Chadt?"):
+            for controller in self.child_controllers:
+                controller.quit()
             self.root.destroy()
     
     def create_server(self):
         s = ServerViewController()
+        self.child_controllers.append(s)
         s.start_view()
 
     def create_client(self):
         c = ClientViewController()
+        self.child_controllers.append(c)
         c.start_view()
 
 def main():

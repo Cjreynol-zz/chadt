@@ -36,6 +36,8 @@ class Server:
         self.listener.shutdown()
         self.processor.shutdown()
         self.message_relayer.shutdown()
+        for client in self.clients.values():
+            client.shutdown()
         log.info("Server shut down.")
     
     def add_client_list_observer(self, observer):

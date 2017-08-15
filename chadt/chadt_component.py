@@ -15,13 +15,18 @@ class ChadtComponent:
             Thread(target = self.get_run_func(thread_target)).start()
         elif self.status == ComponentStatus.STOPPING:
             raise RuntimeError("Component is stopping, cannot restart yet.")
+        elif self.status == ComponentStatus.SHUTTING_DOWN or self.status == ComponentStatus.SHUT_DOWN:
+            raise RuntimeError("Component is shut(ting) down, will not be able to be restarted.")
 
     def get_run_func(self, target_func):
         def f():
             while self.status == ComponentStatus.RUNNING:
                 target_func()
-                sleep(1)
-            self.status = ComponentStatus.STOPPED
+                sleep(0.5)
+            if self.status == ComponentStatus.STOPPING:
+                self.status = ComponentStatus.STOPPED
+            elif self.status == ComponentStatus.SHUTTING_DOWN:
+                self.status = ComponentStatus.SHUT_DOWN
         return f
 
     def stop(self):
@@ -29,7 +34,9 @@ class ChadtComponent:
             self.status = ComponentStatus.STOPPING
 
     def shutdown(self, connection = None):
-        if self.status == ComponentStatus.RUNNING:
-            self.stop()
+        if self.status == ComponentStatus.RUNNING or self.status == ComponentStatus.STOPPING:
+            self.status = ComponentStatus.SHUTTING_DOWN
+        elif self.status == ComponentStatus.STOPPED:
+            self.status = ComponentStatus.SHUT_DOWN
         if connection is not None:
             connection.close()

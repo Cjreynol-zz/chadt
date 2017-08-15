@@ -2,7 +2,8 @@ from enum import Enum
 
 
 class ComponentStatus(Enum):
-    STOPPED = 1
-    RUNNING = 2
+    RUNNING = 1
+    STOPPED = 2
     STOPPING = 3
-    
+    SHUTTING_DOWN = 4
+    SHUT_DOWN = 5

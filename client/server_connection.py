@@ -21,6 +21,9 @@ class ServerConnection(ChadtComponent):
     def start(self):
         super().start(self.transceive)
 
+    def shutdown(self):
+        super().shutdown(self.transceiver)
+
     def transceive(self):
         self.receive_messages()
         self.transmit_messages()
@@ -38,9 +41,10 @@ class ServerConnection(ChadtComponent):
     def receive_messages(self):
         try:
             header = self.transceiver.recv(Message.HEADER_LENGTH)
-            message_length =  Message.get_header(header)[3]
-            message_text = self.transceiver.recv(message_length)
-            self.add_message_to_in_queue(header + message_text)
+            if len(header) > 0:
+                message_length =  Message.get_header(header)[3]
+                message_text = self.transceiver.recv(message_length)
+                self.add_message_to_in_queue(header + message_text)
         except timeout:
             pass
 

@@ -33,13 +33,14 @@ class ClientConnection(ChadtComponent):
     def receive_messages(self):
         try:
             header = self.transceiver.recv(Message.HEADER_LENGTH)
-            unpacked_header = Message.get_header(header)
-            if self.sender_matches_username(unpacked_header):
-                message_length = unpacked_header[3]
-                message = self.transceiver.recv(message_length)
-                self.forward_message(header+message)
-            else:
-                raise RuntimeError("Sender does not match username.")
+            if len(header) > 0:
+                unpacked_header = Message.get_header(header)
+                if self.sender_matches_username(unpacked_header):
+                    message_length = unpacked_header[3]
+                    message = self.transceiver.recv(message_length)
+                    self.forward_message(header+message)
+                else:
+                    raise RuntimeError("Sender does not match username.")
         except timeout:
             pass
 
