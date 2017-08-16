@@ -26,8 +26,8 @@ class ClientViewController(ChadtViewController):
         self.client.start_client()
 
     def display_new_message(self, message_queue):
-        message_text = message_queue.pop(0).message
-        self.view.display_new_message(message_text)
+        message = message_queue.pop(0)
+        self.view.display_new_message(message.message_text)
 
     def send_message_button(self, message_entry):
         def f(event = None):

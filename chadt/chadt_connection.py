@@ -1,9 +1,8 @@
 from socket import timeout
 
 from chadt.chadt_component import ChadtComponent
-from chadt.message import Message
-from chadt.message_type import MessageType
-
+from chadt.chadt_exceptions import ZeroLengthMessageException
+from chadt.message_processor import MessageProcessor
 
 class ChadtConnection(ChadtComponent):
 
@@ -38,17 +37,17 @@ class ChadtConnection(ChadtComponent):
 
     def receive_messages(self):
         try:
-            header = self.transceiver.recv(Message.HEADER_LENGTH)
-            if len(header) > 0:
-                message_length =  Message.get_header(header)[3]
-                message_text = self.transceiver.recv(message_length)
-                self.add_message_to_in_queue(header + message_text)
-        except timeout:
+            bytes_message = MessageProcessor.receive_message_bytes(self.transceiver)
+
+            if not self.decode:
+                self.add_message_to_in_queue(bytes_message)
+            else:
+                self.add_message_to_in_queue(MessageProcessor.bytes_to_message(bytes_message))
+
+        except (timeout, ZeroLengthMessageException):
             pass
 
     def add_message_to_in_queue(self, message):
-        if self.decode:
-            message = Message.bytes_to_message(message)
         self.in_queue.append(message)
 
     def add_message_to_out_queue(self, message):

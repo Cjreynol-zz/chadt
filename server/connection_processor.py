@@ -3,6 +3,7 @@ from socket import SO_REUSEADDR, SOL_SOCKET, timeout
 from chadt.chadt_component import ChadtComponent
 from chadt.chadt_connection import ChadtConnection
 from chadt.message import Message
+from chadt.message_processor import MessageProcessor
 from chadt.message_type import MessageType
 
 
@@ -27,21 +28,17 @@ class ConnectionProcessor(ChadtComponent):
             self.add_new_client(username, new_connection)
 
     def negotiate_username(self, socket):
-        header = socket.recv(Message.HEADER_LENGTH)
-        version, message_type, sender, length = Message.get_header(header)
-        string_sender = sender.decode()
+        message = MessageProcessor.receive_message(socket)
         
-        while (message_type == MessageType.USERNAME_REQUEST or 
-                string_sender in self.server_client_dict):
+        while (message.message_type == MessageType.USERNAME_REQUEST and 
+                message.sender in self.server_client_dict):
             rejection = Message("", "server", MessageType.USERNAME_REJECTED)
             socket.sendall(rejection.make_bytes())
-            header = socket.recv(Message.HEADER_LENGTH)
-            version, message_type, sender, length = Message.get_header(header)
-            string_sender = sender.decode()
+            message = MessageProcessor.receive_message(socket)
 
         acceptance = Message("", "server", MessageType.USERNAME_ACCEPTED)
         socket.sendall(acceptance.make_bytes())
-        return string_sender
+        return message.sender
 
     def add_new_client(self, username, new_connection):
         self.server_client_dict[username] = ChadtConnection(username, new_connection, self.server_message_queue)

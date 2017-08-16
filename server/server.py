@@ -15,26 +15,26 @@ class Server:
         self.server_message_queue = []
 
         self.listener = Listener(self.new_connections, port)
-        self.processor = ConnectionProcessor(self.new_connections, self.clients, self.server_message_queue)
+        self.connection_processor = ConnectionProcessor(self.new_connections, self.clients, self.server_message_queue)
         self.message_relayer = MessageRelayer(self.server_message_queue, self.clients)
 
         log.info("Server created listening at port {}.".format(port))
 
     def start_server(self):
         self.listener.start()
-        self.processor.start()
+        self.connection_processor.start()
         self.message_relayer.start()
         log.info("Server started.")
 
     def stop_server(self):
         self.listener.stop()
-        self.processor.stop()
+        self.connection_processor.stop()
         self.message_relayer.stop()
         log.info("Server stopped.")
 
     def shutdown_server(self):
         self.listener.shutdown()
-        self.processor.shutdown()
+        self.connection_processor.shutdown()
         self.message_relayer.shutdown()
         for client in self.clients.values():
             client.shutdown()

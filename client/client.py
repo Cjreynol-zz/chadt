@@ -3,8 +3,8 @@ from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
 
 from chadt.chadt_connection import ChadtConnection
 from chadt.message import Message
+from chadt.message_processor import MessageProcessor
 from chadt.message_type import MessageType
-
 
 from lib.observed_list import ObservedList
 
@@ -60,8 +60,7 @@ class Client:
         username_request = Message("", username, MessageType.USERNAME_REQUEST)
         socket.sendall(username_request.make_bytes())
 
-        response = socket.recv(Message.HEADER_LENGTH)
-        message = Message.bytes_to_message(response)
+        message = MessageProcessor.receive_message(socket)
 
         if message.message_type == MessageType.USERNAME_REJECTED:
             raise RuntimeError("Username rejected, try again.")
