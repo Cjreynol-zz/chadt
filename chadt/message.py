@@ -10,6 +10,7 @@ message - length
 
 from struct import pack
 
+from chadt.chadt_exceptions import UsernameTooLongException
 from chadt.message_type import MessageType
 
 
@@ -32,6 +33,6 @@ class Message:
 
     def format_sender(self, value):
         if len(value) > Message.SENDER_MAX_LENGTH:
-            raise RuntimeError("Tried to set sender name greater than max length(" + str(Message.SENDER_MAX_LENGTH) + ")")
+            raise UsernameTooLongException()
         else:
             return value.ljust(Message.SENDER_MAX_LENGTH)

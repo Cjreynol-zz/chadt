@@ -1,6 +1,7 @@
 from threading import Thread
 from time import sleep
 
+from chadt.chadt_exceptions import ComponentStoppingException, ComponentShuttingDownException
 from chadt.component_status import ComponentStatus
 
 
@@ -16,9 +17,9 @@ class ChadtComponent:
             self.status = ComponentStatus.RUNNING
             Thread(target = self.get_run_func(thread_target)).start()
         elif self.status == ComponentStatus.STOPPING:
-            raise RuntimeError("Component is stopping, cannot restart yet.")
+            raise ComponentStoppingException("Cannot be restarted yet.")
         elif self.status == ComponentStatus.SHUTTING_DOWN or self.status == ComponentStatus.SHUT_DOWN:
-            raise RuntimeError("Component is shut(ting) down, will not be able to be restarted.")
+            raise ComponentShuttingDownException("Will not be able to be restarted.")
 
     def get_run_func(self, target_func):
         def f():

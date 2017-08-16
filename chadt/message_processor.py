@@ -16,7 +16,7 @@ class MessageProcessor:
     def receive_message_bytes(socket):
         bytes_header = socket.recv(Message.HEADER_LENGTH)
         if len(bytes_header) == 0:
-            raise ZeroLengthMessageException("Expecting normal length message.")
+            raise ZeroLengthMessageException()
         _, _, _, length = MessageProcessor.decode_header(bytes_header)
         bytes_message_text = socket.recv(length)
         return bytes_header + bytes_message_text

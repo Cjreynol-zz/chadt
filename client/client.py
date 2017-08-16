@@ -2,6 +2,7 @@ import logging as log
 from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
 
 from chadt.chadt_connection import ChadtConnection
+from chadt.chadt_exceptions import UsernameRejectedException
 from chadt.message import Message
 from chadt.message_processor import MessageProcessor
 from chadt.message_type import MessageType
@@ -63,9 +64,8 @@ class Client:
         message = MessageProcessor.receive_message(socket)
 
         if message.message_type == MessageType.USERNAME_REJECTED:
-            raise RuntimeError("Username rejected, try again.")
+            raise UsernameRejectedException()
         elif message.message_type == MessageType.USERNAME_ACCEPTED:
             pass
-        else:
-            raise RuntimeError("Unexpected message type.")
+
         socket.settimeout(Client.SOCKET_TIMEOUT)

@@ -1,10 +1,25 @@
 
+class ChadtBaseException(Exception):
 
-class ZeroLengthMessageException(Exception):
-    """
-    Exception for when a socket receives a zero-length message when it 
-    was expecting more.
-    """
-    
-    def __init__(self, message):
+    def __init__(self, message = ""):
         self.message = message
+
+
+class ZeroLengthMessageException(ChadtBaseException):
+    pass
+    
+
+class UsernameRejectedException(ChadtBaseException):
+    pass
+
+
+class UsernameTooLongException(ChadtBaseException):
+    pass
+
+
+class ComponentStoppingException(ChadtBaseException):
+    pass
+
+
+class ComponentShuttingDownException(ChadtBaseException):
+    pass
