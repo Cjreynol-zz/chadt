@@ -4,13 +4,14 @@ from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
 from chadt.chadt_connection import ChadtConnection
 from chadt.chadt_exceptions import UsernameRejectedException
 from chadt.message import Message
+from chadt.message_handler import MessageHandler
 from chadt.message_processor import MessageProcessor
 from chadt.message_type import MessageType
 
 from lib.observed_list import ObservedList
 
 
-class Client:
+class Client(MessageHandler):
 
     SOCKET_TIMEOUT = 0.5
 
@@ -19,10 +20,14 @@ class Client:
 
         self.message_in_queue = ObservedList()
         self.message_out_queue = []
+        self.message_processing_queue = []
+
+        self.message_processor = MessageProcessor(self.message_processing_queue, self)
 
         socket = self.initialize_connection(self.username, server_host, server_port)
         self.server_connection = ChadtConnection(self.username, socket, self.message_in_queue, self.message_out_queue, True)
 
+        super().__init__()
         log.info("Client created.")
 
     def start_client(self): 

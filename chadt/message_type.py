@@ -9,6 +9,7 @@ class MessageType(Enum):
     USERNAME_REQUEST = 20
     USERNAME_ACCEPTED = 21
     USERNAME_REJECTED = 22
+    TEMP_USERNAME_ASSIGNED = 23
     
     ERROR = 90
 

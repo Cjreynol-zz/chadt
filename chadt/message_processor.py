@@ -5,7 +5,7 @@ from chadt.message import Message
 from chadt.message_type import MessageType
 
 
-class MessageProcessor:
+class MessageProcessor(ChadtComponent):
 
     @staticmethod
     def receive_message(socket):
@@ -32,5 +32,36 @@ class MessageProcessor:
         version, message_type, sender, length = unpack("BB" + str(Message.SENDER_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
         return (version, MessageType(message_type), sender.decode(), length)
     
-    def __init__(self):
-        pass
+    def __init__(self, message_processing_queue, message_handler):
+        self.message_processing_queue = message_processing_queue
+        self.message_handler = message_handler
+        
+        super().__init__()
+
+    def start(self):
+        super().start(process_messages)
+
+    def process_messages(self):
+        if len(self.message_processing_queue) > 0:
+            bytes_message = self.message_processing_queue.pop(0)
+            self.process_message(bytes_message)
+
+    def process_message(self, bytes_message):
+        message = MessageProcessor.bytes_to_message(bytes_message)
+
+        if message.message_type == MessageType.TEXT:
+            self.message_handler.handle_text(message)
+        elif message.message_type == MessageType.DISCONNECT:
+            self.message_handler.handle_disconnect(message)
+        elif message.message_type == MessageType.USERNAME_REQUEST:
+            self.message_handler.handle_username_request(message)
+        elif message.message_type == MessageType.USERNAME_ACCEPTED:
+            self.message_handler.handle_username_accepted(message)
+        elif message.message_type == MessageType.USERNAME_REJECTED:
+            self.message_handler.handle_username_rejected(message)
+        elif message.message_type == MessageType.TEMP_USERNAME_ASSIGNED:
+            self.message_handler.handle_temp_username_assigned(message)
+        elif message.message_type == MessageType.ERROR:
+            self.message_handler.handle_error(message)
+        else:
+            raise RuntimeError("Unexpected message type.")

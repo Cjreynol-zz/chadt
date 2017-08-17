@@ -1,5 +1,8 @@
 import logging as log
 
+from chadt.message_handler import MessageHandler
+from chadt.message_processor import MessageProcessor
+
 from lib.observed_key_list_dict import ObservedKeyListDict
 
 from server.connection_processor import ConnectionProcessor
@@ -7,17 +10,21 @@ from server.listener import Listener
 from server.message_relayer import MessageRelayer
 
 
-class Server:
+class Server(MessageHandler):
     
     def __init__(self, port):
         self.clients = ObservedKeyListDict()
         self.new_connections = []
         self.server_message_queue = []
+        self.message_processing_queue = []
 
         self.listener = Listener(self.new_connections, port)
         self.connection_processor = ConnectionProcessor(self.new_connections, self.clients, self.server_message_queue)
-        self.message_relayer = MessageRelayer(self.server_message_queue, self.clients)
 
+        self.message_relayer = MessageRelayer(self.server_message_queue, self.clients)
+        self.message_processor = MessageProcessor(self.message_processing_queue, self)
+
+        super().__init__()
         log.info("Server created listening at port {}.".format(port))
 
     def start_server(self):
