@@ -1,7 +1,8 @@
 import logging as log
 
+from chadt.message import Message
 from chadt.message_handler import MessageHandler
-from chadt.message_processor import MessageProcessor
+from chadt.message_type import MessageType
 
 from lib.observed_key_list_dict import ObservedKeyListDict
 
@@ -13,30 +14,30 @@ from server.message_relayer import MessageRelayer
 class Server(MessageHandler):
     
     def __init__(self, port):
+        super().__init__()
+
         self.clients = ObservedKeyListDict()
         self.new_connections = []
-        self.server_message_queue = []
-        self.message_processing_queue = []
+        self.message_out_queue = []
 
         self.listener = Listener(self.new_connections, port)
-        self.connection_processor = ConnectionProcessor(self.new_connections, self.clients, self.server_message_queue)
+        self.connection_processor = ConnectionProcessor(self.new_connections, self.clients, self.message_processing_queue)
+        self.message_relayer = MessageRelayer(self.message_out_queue, self.clients)
 
-        self.message_relayer = MessageRelayer(self.server_message_queue, self.clients)
-        self.message_processor = MessageProcessor(self.message_processing_queue, self)
-
-        super().__init__()
         log.info("Server created listening at port {}.".format(port))
 
     def start_server(self):
         self.listener.start()
         self.connection_processor.start()
         self.message_relayer.start()
+        super().start()
         log.info("Server started.")
 
     def stop_server(self):
         self.listener.stop()
         self.connection_processor.stop()
         self.message_relayer.stop()
+        super().stop()
         log.info("Server stopped.")
 
     def shutdown_server(self):
@@ -45,7 +46,23 @@ class Server(MessageHandler):
         self.message_relayer.shutdown()
         for client in self.clients.values():
             client.shutdown()
+        super().shutdown()
         log.info("Server shut down.")
     
     def add_client_list_observer(self, observer):
         self.clients.add_observer(observer)
+
+    def handle_text(self, message):
+        self.message_out_queue.append(message.make_bytes())
+
+    def handle_disconnect(self, message):
+        self.clients[message.sender].shutdown()
+        del self.clients[message.sender]
+
+    def handle_username_request(self, message):
+        username = message.message_text
+        if username not in self.clients:
+            response_message = Message(username, "server", MessageType.USERNAME_ACCEPTED)
+        else:
+            response_message = Message(username, "server", MessageType.USERNAME_REJECTED)
+        self.clients[message.sender].add_message_to_out_queue(response_message)

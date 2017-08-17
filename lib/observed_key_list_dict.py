@@ -10,18 +10,12 @@ class ObservedKeyListDict(MutableMapping):
         return self._dict[key]
 
     def __setitem__(self, key, value):
-        if key not in self._dict:
-            self._dict[key] = value
-            self.notify_observers()
-        else:   
-            self._dict[key] = value
+        self._dict[key] = value
+        self.notify_observers()
 
     def __delitem__(self, key):
-        if key in self._dict:
-            del self._dict[key]
-            self.notify_observers()
-        else:
-            del self._dict[key]
+        del self._dict[key]
+        self.notify_observers()
 
     def __iter__(self):
         return iter(self._dict)

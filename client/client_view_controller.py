@@ -10,24 +10,24 @@ class ClientViewController(ChadtViewController):
         super().__init__(ClientView)
         self.client = None
 
-    def confirm_button(self, username_entry, server_host_entry, server_port_entry):
+    def confirm_button(self, server_host_entry, server_port_entry):
         def f():
             server_port = server_port_entry.get()
             if not self.is_valid_port_num(server_port):
                 self.view.not_an_int_warning()
             else:
-                self.create_client(username_entry.get(), server_host_entry.get(), int(server_port))
+                self.create_client(server_host_entry.get(), int(server_port))
                 self.start_main_window()
         return f
 
-    def create_client(self, username, server_host, server_port):
-        self.client = Client(username, server_host, server_port)
+    def create_client(self, server_host, server_port):
+        self.client = Client(server_host, server_port)
         self.client.add_message_in_queue_observer(self.display_new_message)
         self.client.start_client()
 
     def display_new_message(self, message_queue):
         message = message_queue.pop(0)
-        self.view.display_new_message(message.message_text)
+        self.view.display_new_message(message.display_string())
 
     def send_message_button(self, message_entry):
         def f(event = None):

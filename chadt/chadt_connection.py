@@ -11,7 +11,7 @@ class ChadtConnection(ChadtComponent):
         self.transceiver = socket
 
         self.processing_queue = processing_queue
-        # here, None signifies that the out_queue is local to the connection
+        # None signifies that the out_queue is local to the connection
         if out_queue is not None:
             self.out_queue = out_queue
         else:
@@ -38,7 +38,6 @@ class ChadtConnection(ChadtComponent):
         try:
             bytes_message = MessageProcessor.receive_message_bytes(self.transceiver)
             self.add_message_to_processing_queue(bytes_message)
-
         except (timeout, ZeroLengthMessageException):
             pass
 

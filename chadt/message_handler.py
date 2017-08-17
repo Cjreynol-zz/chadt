@@ -1,10 +1,22 @@
 from warnings import warn
 
+from chadt.message_processor import MessageProcessor
+
 
 class MessageHandler:
     
     def __init__(self):
-        pass
+        self.message_processing_queue = []
+        self.message_processor = MessageProcessor(self.message_processing_queue, self)
+
+    def start(self):
+        self.message_processor.start()
+
+    def stop(self):
+        self.message_processor.stop()
+
+    def shutdown(self):
+        self.message_processor.shutdown()
 
     def raise_unhandled_warning(self):
         warn("Unhandled message type.")

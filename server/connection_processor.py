@@ -3,16 +3,19 @@ from socket import SO_REUSEADDR, SOL_SOCKET, timeout
 from chadt.chadt_component import ChadtComponent
 from chadt.chadt_connection import ChadtConnection
 from chadt.message import Message
-from chadt.message_processor import MessageProcessor
 from chadt.message_type import MessageType
 
 
 class ConnectionProcessor(ChadtComponent):
+
+    DEFAULT_USERNAME_BASE = "User"
     
-    def __init__(self, new_connection_list, server_client_dict, server_message_queue):
+    def __init__(self, new_connection_list, server_client_dict, server_processing_queue):
+        self.temp_id_counter = 0
+
         self.new_connection_list = new_connection_list
         self.server_client_dict = server_client_dict
-        self.server_message_queue = server_message_queue
+        self.server_processing_queue = server_processing_queue
         
         super().__init__()
 
@@ -21,25 +24,21 @@ class ConnectionProcessor(ChadtComponent):
 
     def process_connections(self):
         if len(self.new_connection_list) > 0:
-            new_connection = self.new_connection_list.pop(0)[0]
-            username = self.negotiate_username(new_connection)
-            new_connection.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-            new_connection.settimeout(2)
-            self.add_new_client(username, new_connection)
+            socket, address  = self.new_connection_list.pop(0)
+            socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+            socket.settimeout(2)
 
-    def negotiate_username(self, socket):
-        message = MessageProcessor.receive_message(socket)
+            username = ConnectionProcessor.DEFAULT_USERNAME_BASE + str(self.temp_id_counter)
+            # this relying on the spaces in the formatting is a nightmare
+            username = username.ljust(Message.SENDER_MAX_LENGTH)
+            self.temp_id_counter += 1
+
+            self.add_new_client(username, socket)
+
+    def add_new_client(self, username, socket):
+        self.server_client_dict[username] = ChadtConnection(username, socket, self.server_processing_queue)
+
+        temp_id_message = Message(username, "server", MessageType.TEMP_USERNAME_ASSIGNED)
+        self.server_client_dict[username].add_message_to_out_queue(temp_id_message.make_bytes())
         
-        while (message.message_type == MessageType.USERNAME_REQUEST and 
-                message.sender in self.server_client_dict):
-            rejection = Message("", "server", MessageType.USERNAME_REJECTED)
-            socket.sendall(rejection.make_bytes())
-            message = MessageProcessor.receive_message(socket)
-
-        acceptance = Message("", "server", MessageType.USERNAME_ACCEPTED)
-        socket.sendall(acceptance.make_bytes())
-        return message.sender
-
-    def add_new_client(self, username, new_connection):
-        self.server_client_dict[username] = ChadtConnection(username, new_connection, self.server_message_queue)
         self.server_client_dict[username].start()

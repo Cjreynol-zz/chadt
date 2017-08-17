@@ -15,3 +15,6 @@ class MessageType(Enum):
 
     def __int__(self):
         return self.value
+
+    def __str__(self):
+        return self.name

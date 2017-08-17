@@ -1,5 +1,6 @@
 from struct import unpack
 
+from chadt.chadt_component import ChadtComponent
 from chadt.chadt_exceptions import ZeroLengthMessageException
 from chadt.message import Message
 from chadt.message_type import MessageType
@@ -39,7 +40,7 @@ class MessageProcessor(ChadtComponent):
         super().__init__()
 
     def start(self):
-        super().start(process_messages)
+        super().start(self.process_messages)
 
     def process_messages(self):
         if len(self.message_processing_queue) > 0:

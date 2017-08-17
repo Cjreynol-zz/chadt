@@ -11,9 +11,6 @@ class ClientView(ChadtView):
         self.text_entry = None
 
     def add_config_widgets(self):
-        l1 = tk.Label(self.root, text="Choose Username:")
-        client_username_entry = tk.Entry(self.root)
-        client_username_entry.insert(0, "Username")
 
         l2 = tk.Label(self.root, text="Choose Server host/port:")
         server_host_entry = tk.Entry(self.root)
@@ -21,12 +18,8 @@ class ClientView(ChadtView):
         server_port_entry = tk.Entry(self.root)
         server_port_entry.insert(0, "50000")
 
-        b = tk.Button(self.root, text="Confirm", command=self.controller.confirm_button(client_username_entry, server_host_entry, server_port_entry))
+        b = tk.Button(self.root, text="Confirm", command=self.controller.confirm_button(server_host_entry, server_port_entry))
         
-        
-        l1.grid(row=1, column=0)
-        client_username_entry.grid(row=1, column=1)
-
         l2.grid(row=0, column=0)
         server_host_entry.grid(row=0, column=1)
         server_port_entry.grid(row=0, column=2)

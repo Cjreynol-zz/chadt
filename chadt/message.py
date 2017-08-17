@@ -31,8 +31,16 @@ class Message:
         data = pack(pack_string, self.version, int(self.message_type), bytes(self.sender, "utf-8"), self.length, bytes(self.message_text, "utf-8"))
         return data
 
+    # there has to be a better way to do this so that the spaces only exist 
+    # when the message is in byte form
     def format_sender(self, value):
         if len(value) > Message.SENDER_MAX_LENGTH:
             raise UsernameTooLongException()
         else:
             return value.ljust(Message.SENDER_MAX_LENGTH)
+
+    def display_string(self):
+        return self.sender.rstrip() + ":  " + self.message_text
+
+    def __str__(self):
+        return self.sender + ":" + str(self.message_type)
