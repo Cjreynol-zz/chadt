@@ -1,4 +1,4 @@
-from struct import unpack
+from struct import pack, unpack
 
 from chadt.chadt_component import ChadtComponent
 from chadt.chadt_exceptions import ZeroLengthMessageException
@@ -32,6 +32,12 @@ class MessageProcessor(ChadtComponent):
     def decode_header(byte_array):
         version, message_type, sender, length = unpack("BB" + str(Message.SENDER_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
         return (version, MessageType(message_type), sender.decode().rstrip(), length)
+
+    @staticmethod
+    def make_bytes(message):
+        pack_string = "BB" + str(Message.SENDER_MAX_LENGTH) + "sH" + str(message.length) + "s"
+        data = pack(pack_string, message.version, int(message.message_type), bytes(message.sender.ljust(Message.SENDER_MAX_LENGTH), "utf-8"), message.length, bytes(message.message_text, "utf-8"))
+        return data
     
     def __init__(self, message_processing_queue, message_handler):
         self.message_processing_queue = message_processing_queue

@@ -32,7 +32,7 @@ class ChadtConnection(ChadtComponent):
     def transmit_messages(self):
         if len(self.out_queue) > 0:
             message = self.out_queue.pop(0)
-            bytes_message = message.make_bytes()
+            bytes_message = MessageProcessor.make_bytes(message)
             self.transceiver.sendall(bytes_message)
 
     def receive_messages(self):

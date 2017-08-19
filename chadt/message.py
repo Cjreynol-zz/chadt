@@ -8,8 +8,6 @@ message - length
 """
 
 
-from struct import pack
-
 from chadt.chadt_exceptions import UsernameTooLongException
 from chadt.message_type import MessageType
 
@@ -26,13 +24,8 @@ class Message:
         self.version = version
         self.message_type = message_type
 
-    def make_bytes(self):
-        pack_string = "BB" + str(Message.SENDER_MAX_LENGTH) + "sH" + str(self.length) + "s"
-        data = pack(pack_string, self.version, int(self.message_type), bytes(self.sender.ljust(Message.SENDER_MAX_LENGTH), "utf-8"), self.length, bytes(self.message_text, "utf-8"))
-        return data
-
     def display_string(self):
-        return self.sender.rstrip() + ":  " + self.message_text
+        return self.sender + ":  " + self.message_text
 
     def __str__(self):
         return self.sender + ":" + str(self.message_type)
