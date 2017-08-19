@@ -29,8 +29,6 @@ class ConnectionProcessor(ChadtComponent):
             socket.settimeout(2)
 
             username = ConnectionProcessor.DEFAULT_USERNAME_BASE + str(self.temp_id_counter)
-            # this relying on the spaces in the formatting is a nightmare
-            username = username.ljust(Message.SENDER_MAX_LENGTH)
             self.temp_id_counter += 1
 
             self.add_new_client(username, socket)
@@ -39,6 +37,6 @@ class ConnectionProcessor(ChadtComponent):
         self.server_client_dict[username] = ChadtConnection(username, socket, self.server_processing_queue)
 
         temp_id_message = Message(username, "server", MessageType.TEMP_USERNAME_ASSIGNED)
-        self.server_client_dict[username].add_message_to_out_queue(temp_id_message.make_bytes())
+        self.server_client_dict[username].add_message_to_out_queue(temp_id_message)
         
         self.server_client_dict[username].start()

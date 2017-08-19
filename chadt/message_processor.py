@@ -31,7 +31,7 @@ class MessageProcessor(ChadtComponent):
     @staticmethod
     def decode_header(byte_array):
         version, message_type, sender, length = unpack("BB" + str(Message.SENDER_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
-        return (version, MessageType(message_type), sender.decode(), length)
+        return (version, MessageType(message_type), sender.decode().rstrip(), length)
     
     def __init__(self, message_processing_queue, message_handler):
         self.message_processing_queue = message_processing_queue

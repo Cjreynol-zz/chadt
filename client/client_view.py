@@ -8,7 +8,7 @@ class ClientView(ChadtView):
     def __init__(self, controller):
         super().__init__("Chadt Client", controller)
         self.text = None
-        self.text_entry = None
+        self.message_entry = None
 
     def add_config_widgets(self):
 
@@ -33,20 +33,29 @@ class ClientView(ChadtView):
         scroll = tk.Scrollbar(self.root, command=self.text.yview)
         self.text["yscrollcommand"] = scroll.set
 
-        self.text_entry = tk.Entry(self.root)
-        self.text_entry.insert(0, "Enter messages here")
-        self.root.bind("<Return>", self.controller.send_message_button(self.text_entry))
-		
-        b = tk.Button(self.root, text="Send Message", command=self.controller.send_message_button(self.text_entry))
+        self.message_entry = tk.Entry(self.root)
+        self.message_entry.insert(0, "Enter messages here")
+        self.root.bind("<Return>", self.controller.send_message_button(self.message_entry))
+        # this^ bind works as long as the window is selected
+        # (and it is not overriden by the text widget's bind)
+        send_message_button = tk.Button(self.root, text="Send Message", command=self.controller.send_message_button(self.message_entry))
+
+        username_entry = tk.Entry(self.root)
+        username_entry.insert(0, "Enter username here")
+        update_username_button = tk.Button(self.root, text="Update Username", command=self.controller.update_username_button(username_entry))
         
         self.text.grid(row=0, column=0)
         scroll.grid(row=0, column=1)
-        self.text_entry.grid(row=1, column=0)
-        b.grid(row=1, column=1)
+
+        username_entry.grid(row=0, column=1)
+        update_username_button.grid(row=1, column=1)
+
+        self.message_entry.grid(row=2, column=0)
+        send_message_button.grid(row=2, column=1)
 
     def display_new_message(self, message):
         self.text.insert(tk.END, message+"\n")
         self.text.see(tk.END)
 
     def clear_entry_box(self):
-        self.text_entry.delete(0, tk.END)
+        self.message_entry.delete(0, tk.END)

@@ -42,8 +42,9 @@ class Client(MessageHandler):
         super().shutdown()
         log.info("Client shut down.")
 
-    def add_message_to_out_queue(self, message_text):
-        self.message_out_queue.append(Message(message_text, self.username).make_bytes())
+    def add_message_to_out_queue(self, message_text, message_type = MessageType.TEXT):
+        message = Message(message_text, self.username, message_type)
+        self.message_out_queue.append(message)
 
     def add_message_in_queue_observer(self, observer):
         self.message_in_queue.add_observer(observer)
@@ -78,3 +79,6 @@ class Client(MessageHandler):
 
     def handle_temp_username_assigned(self, message):
         self.handle_username_accepted(message)
+
+    def send_username_request(self, username):
+        self.add_message_to_out_queue(username, MessageType.USERNAME_REQUEST)

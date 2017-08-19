@@ -53,7 +53,7 @@ class Server(MessageHandler):
         self.clients.add_observer(observer)
 
     def handle_text(self, message):
-        self.message_out_queue.append(message.make_bytes())
+        self.message_out_queue.append(message)
 
     def handle_disconnect(self, message):
         self.clients[message.sender].shutdown()

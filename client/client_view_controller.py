@@ -39,3 +39,9 @@ class ClientViewController(ChadtViewController):
         if self.client is not None:
             self.client.shutdown_client()
         self.view.quit()
+
+    def update_username_button(self, username_entry):
+        def f():
+            requested_username = username_entry.get()
+            self.client.send_username_request(requested_username)
+        return f
