@@ -44,8 +44,8 @@ class Server(MessageHandler):
         self.listener.shutdown()
         self.connection_processor.shutdown()
         self.message_relayer.shutdown()
-        for client in self.clients.values():
-            client.shutdown()
+        for client_connection in self.clients.values():
+            client_connection.shutdown()
         super().shutdown()
         log.info("Server shut down.")
     
@@ -61,8 +61,15 @@ class Server(MessageHandler):
 
     def handle_username_request(self, message):
         username = message.message_text
+        message_type = MessageType.USERNAME_ACCEPTED
+        recipient = username
+
         if username not in self.clients:
-            response_message = Message(username, "server", MessageType.USERNAME_ACCEPTED)
+            self.clients[username] = self.clients.pop(message.sender)
+            self.clients[username].username = username
         else:
-            response_message = Message(username, "server", MessageType.USERNAME_REJECTED)
-        self.clients[message.sender].add_message_to_out_queue(response_message)
+            message_type = MessageType.USERNAME_REJECTED
+            recipient = message.sender
+
+        response_message = Message(username, "server", message_type)
+        self.clients[recipient].add_message_to_out_queue(response_message)

@@ -2,7 +2,9 @@ from socket import timeout
 
 from chadt.chadt_component import ChadtComponent
 from chadt.chadt_exceptions import ZeroLengthMessageException
+from chadt.message import Message
 from chadt.message_processor import MessageProcessor
+from chadt.message_type import MessageType
 
 class ChadtConnection(ChadtComponent):
 
@@ -23,6 +25,7 @@ class ChadtConnection(ChadtComponent):
         super().start(self.transceive)
 
     def shutdown(self):
+        self.transmit_message(Message("", self.username, MessageType.DISCONNECT))
         super().shutdown(self.transceiver)
 
     def transceive(self):
@@ -32,8 +35,11 @@ class ChadtConnection(ChadtComponent):
     def transmit_messages(self):
         if len(self.out_queue) > 0:
             message = self.out_queue.pop(0)
-            bytes_message = MessageProcessor.make_bytes(message)
-            self.transceiver.sendall(bytes_message)
+            self.transmit_message(message)
+
+    def transmit_message(self, message):
+        bytes_message = MessageProcessor.make_bytes(message)
+        self.transceiver.sendall(bytes_message)
 
     def receive_messages(self):
         try:
