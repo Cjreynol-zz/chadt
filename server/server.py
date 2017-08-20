@@ -67,7 +67,7 @@ class Server(MessageHandler):
         message_type = MessageType.USERNAME_ACCEPTED
         recipient = username
 
-        if username not in self.clients:
+        if username not in self.clients and self.is_username_valid_length(username):
             self.clients[username] = self.clients.pop(message.sender)
             self.clients[username].username = username
         else:

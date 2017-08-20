@@ -2,7 +2,7 @@ import logging as log
 from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
 
 from chadt.chadt_connection import ChadtConnection
-from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameRejectedException
+from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameRejectedException, UsernameTooLongException
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
 from chadt.message_type import MessageType
@@ -73,9 +73,12 @@ class Client(MessageHandler):
 
     def handle_username_accepted(self, message):
         username = message.message_text
-        self.username = username
-        self.server_connection.username = username
-        self.username_stable = True
+        if self.is_username_valid_length(username):
+            self.username = username
+            self.server_connection.username = username
+            self.username_stable = True
+        else:
+            raise UsernameTooLongException()
 
     def handle_username_rejected(self, message):
         self.username_stable = True
@@ -85,5 +88,8 @@ class Client(MessageHandler):
         self.handle_username_accepted(message)
 
     def send_username_request(self, username):
-        self.add_message_to_out_queue(username, MessageType.USERNAME_REQUEST)
-        self.username_stable = False
+        if self.is_username_valid_length(username):
+            self.add_message_to_out_queue(username, MessageType.USERNAME_REQUEST)
+            self.username_stable = False
+        else:
+            raise UsernameTooLongException()

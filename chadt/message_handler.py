@@ -1,5 +1,6 @@
 from warnings import warn
 
+from chadt.message import Message
 from chadt.message_processor import MessageProcessor
 
 
@@ -17,6 +18,9 @@ class MessageHandler:
 
     def shutdown(self):
         self.message_processor.shutdown()
+
+    def is_username_valid_length(self, username):
+        return len(username) <= Message.SENDER_MAX_LENGTH
 
     def raise_unhandled_warning(self):
         warn("Unhandled message type.")
