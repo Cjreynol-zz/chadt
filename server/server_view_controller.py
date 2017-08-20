@@ -21,6 +21,7 @@ class ServerViewController(ChadtViewController):
     def create_server(self, port_num):
         self.server = Server(port_num)
         self.server.add_client_list_observer(self.client_list_update)
+        self.server.add_message_in_queue_observer(self.display_new_text_message)
         self.server.start_server()
 
     def client_list_update(self):
@@ -30,3 +31,7 @@ class ServerViewController(ChadtViewController):
         if self.server is not None:
             self.server.shutdown_server()
         self.view.quit()
+
+    def display_new_text_message(self, message_queue):
+        message = message_queue.pop(0)
+        self.view.display_new_text_message(message.display_string())

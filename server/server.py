@@ -5,6 +5,7 @@ from chadt.message_handler import MessageHandler
 from chadt.message_type import MessageType
 
 from lib.observed_key_list_dict import ObservedKeyListDict
+from lib.observed_list import ObservedList
 
 from server.connection_processor import ConnectionProcessor
 from server.listener import Listener
@@ -19,6 +20,7 @@ class Server(MessageHandler):
         self.clients = ObservedKeyListDict()
         self.new_connections = []
         self.message_out_queue = []
+        self.message_in_queue = ObservedList()
 
         self.listener = Listener(self.new_connections, port)
         self.connection_processor = ConnectionProcessor(self.new_connections, self.clients, self.message_processing_queue)
@@ -53,6 +55,7 @@ class Server(MessageHandler):
         self.clients.add_observer(observer)
 
     def handle_text(self, message):
+        self.message_in_queue.append(message)
         self.message_out_queue.append(message)
 
     def handle_disconnect(self, message):
@@ -73,3 +76,6 @@ class Server(MessageHandler):
 
         response_message = Message(username, "server", message_type)
         self.clients[recipient].add_message_to_out_queue(response_message)
+
+    def add_message_in_queue_observer(self, observer):
+        self.message_in_queue.add_observer(observer)

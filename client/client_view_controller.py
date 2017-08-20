@@ -22,12 +22,12 @@ class ClientViewController(ChadtViewController):
 
     def create_client(self, server_host, server_port):
         self.client = Client(server_host, server_port)
-        self.client.add_message_in_queue_observer(self.display_new_message)
+        self.client.add_message_in_queue_observer(self.display_new_text_message)
         self.client.start_client()
 
-    def display_new_message(self, message_queue):
+    def display_new_text_message(self, message_queue):
         message = message_queue.pop(0)
-        self.view.display_new_message(message.display_string())
+        self.view.display_new_text_message(message.display_string())
 
     def send_message_button(self, message_entry):
         def f(event = None):
