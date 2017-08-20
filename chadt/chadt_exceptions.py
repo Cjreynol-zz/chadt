@@ -5,9 +5,17 @@ class ChadtBaseException(Exception):
         self.message = message
 
 
-class ZeroLengthMessageException(ChadtBaseException):
+class ComponentShuttingDownException(ChadtBaseException):
     pass
-    
+
+
+class ComponentStoppingException(ChadtBaseException):
+    pass
+
+
+class UsernameCurrentlyUnstableException(ChadtBaseException):
+    pass
+
 
 class UsernameRejectedException(ChadtBaseException):
     pass
@@ -17,9 +25,5 @@ class UsernameTooLongException(ChadtBaseException):
     pass
 
 
-class ComponentStoppingException(ChadtBaseException):
-    pass
-
-
-class ComponentShuttingDownException(ChadtBaseException):
+class ZeroLengthMessageException(ChadtBaseException):
     pass

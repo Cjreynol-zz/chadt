@@ -2,7 +2,7 @@ import logging as log
 from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
 
 from chadt.chadt_connection import ChadtConnection
-from chadt.chadt_exceptions import UsernameRejectedException
+from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameRejectedException
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
 from chadt.message_type import MessageType
@@ -18,6 +18,7 @@ class Client(MessageHandler):
         super().__init__()
 
         self.username = ""
+        self.username_stable = False
 
         self.message_in_queue = ObservedList()
         self.message_out_queue = []
@@ -43,8 +44,11 @@ class Client(MessageHandler):
         log.info("Client shut down.")
 
     def add_message_to_out_queue(self, message_text, message_type = MessageType.TEXT):
-        message = Message(message_text, self.username, message_type)
-        self.message_out_queue.append(message)
+        if self.username_stable:
+            message = Message(message_text, self.username, message_type)
+            self.message_out_queue.append(message)
+        else:
+            raise UsernameCurrentlyUnstableException()
 
     def add_message_in_queue_observer(self, observer):
         self.message_in_queue.add_observer(observer)
@@ -73,8 +77,10 @@ class Client(MessageHandler):
         username = message.message_text
         self.username = username
         self.server_connection.username = username
+        self.username_stable = True
 
     def handle_username_rejected(self, message):
+        self.username_stable = True
         raise UsernameRejectedException()
 
     def handle_temp_username_assigned(self, message):
@@ -82,3 +88,4 @@ class Client(MessageHandler):
 
     def send_username_request(self, username):
         self.add_message_to_out_queue(username, MessageType.USERNAME_REQUEST)
+        self.username_stable = False
