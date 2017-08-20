@@ -17,8 +17,11 @@ class ChadtView:
         for widget in self.root.grid_slaves():
             widget.destroy()
 
+    def warning_message(self, title, warning_message):
+        showwarning(title, warning_message)
+
     def invalid_port_warning(self):
-        showwarning("Invalid value", "Port selection entry is not an integer in port range(0-65535).")
+        self.warning_message("Invalid value", "Port selection entry is not an integer in port range(0-65535).")
 
     def start(self):
         self.add_config_widgets()

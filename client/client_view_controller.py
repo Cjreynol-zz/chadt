@@ -1,4 +1,5 @@
 from chadt.chadt_view_controller import ChadtViewController
+from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameTooLongException
 
 from client.client import Client
 from client.client_view import ClientView
@@ -14,7 +15,7 @@ class ClientViewController(ChadtViewController):
         def f():
             server_port = server_port_entry.get()
             if not self.is_valid_port_num(server_port):
-                self.view.not_an_int_warning()
+                self.view.invalid_port_warning()
             else:
                 self.create_client(server_host_entry.get(), int(server_port))
                 self.start_main_window()
@@ -42,6 +43,13 @@ class ClientViewController(ChadtViewController):
 
     def update_username_button(self, username_entry):
         def f():
-            requested_username = username_entry.get()
-            self.client.send_username_request(requested_username)
+            try:
+                requested_username = username_entry.get()
+                self.client.send_username_request(requested_username)
+            except UsernameCurrentlyUnstableException:
+                self.view.warning_message("Username Unstable", "Username is currently being updated, please wait until it is set to try again.")
+            except UsernameTooLongException:
+                # should make a constants file for numbers like sender max length
+                self.view.warning_message("Username Too Long", "Username requested is too long, please limit it to 16 chars")
+                
         return f

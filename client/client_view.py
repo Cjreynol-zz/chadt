@@ -36,8 +36,6 @@ class ClientView(ChadtView):
         self.message_entry = tk.Entry(self.root)
         self.message_entry.insert(0, "Enter messages here")
         self.root.bind("<Return>", self.controller.send_message_button(self.message_entry))
-        # this^ bind works as long as the window is selected
-        # (and it is not overriden by the text widget's bind)
         send_message_button = tk.Button(self.root, text="Send Message", command=self.controller.send_message_button(self.message_entry))
 
         username_entry = tk.Entry(self.root)
