@@ -13,7 +13,7 @@ class Listener(ChadtComponent):
 
     def initialize_socket(self, port):
         s = socket()
-        s.settimeout(2)
+        s.settimeout(ChadtComponent.SOCKET_TIMEOUT)
         s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         s.bind(("", port))
         s.listen()

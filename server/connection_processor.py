@@ -26,7 +26,7 @@ class ConnectionProcessor(ChadtComponent):
         if len(self.new_connection_list) > 0:
             socket, address  = self.new_connection_list.pop(0)
             socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-            socket.settimeout(2)
+            socket.settimeout(ChadtComponent.SOCKET_TIMEOUT)
 
             username = ConnectionProcessor.DEFAULT_USERNAME_BASE + str(self.temp_id_counter)
             self.temp_id_counter += 1

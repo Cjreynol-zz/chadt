@@ -12,8 +12,6 @@ from lib.observed_list import ObservedList
 
 class Client(MessageHandler):
 
-    SOCKET_TIMEOUT = 0.5
-
     def __init__(self, server_host, server_port):
         super().__init__()
 
@@ -61,7 +59,7 @@ class Client(MessageHandler):
     def create_socket(self):
         s = socket()
         s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        s.settimeout(Client.SOCKET_TIMEOUT)
+        s.settimeout(ChadtConnection.SOCKET_TIMEOUT)
         return s
 
     def connect_socket(self, socket, server_host, server_port):
