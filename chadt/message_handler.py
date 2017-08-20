@@ -43,5 +43,8 @@ class MessageHandler:
     def handle_temp_username_assigned(self, message):
         self.raise_unhandled_warning()
 
+    def handle_list_of_users(self, message):
+        self.raise_unhandled_warning()
+
     def handle_error(self, message):
         self.raise_unhandled_warning()

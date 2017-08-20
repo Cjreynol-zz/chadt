@@ -19,6 +19,7 @@ class Client(MessageHandler):
 
         self.message_in_queue = ObservedList()
         self.message_out_queue = []
+        self.connected_users = ObservedList()
 
         socket = self.initialize_connection(server_host, server_port)
         self.server_connection = ChadtConnection(self.username, socket, self.message_processing_queue, self.message_out_queue)
@@ -49,6 +50,9 @@ class Client(MessageHandler):
 
     def add_message_in_queue_observer(self, observer):
         self.message_in_queue.add_observer(observer)
+
+    def add_connected_users_observer(self, observer):
+        self.connected_users.add_observer(observer)
 
     def initialize_connection(self, server_host, server_port):
         socket = self.create_socket()
@@ -85,6 +89,11 @@ class Client(MessageHandler):
 
     def handle_temp_username_assigned(self, message):
         self.handle_username_accepted(message)
+
+    def handle_list_of_users(self, message):
+        self.connected_users.clear()
+        for user in message.message_text.split(','):
+            self.connected_users.append(user)
 
     def send_username_request(self, username):
         if self.is_username_valid_length(username):

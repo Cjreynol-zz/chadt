@@ -9,6 +9,7 @@ class ClientView(ChadtView):
         super().__init__("Chadt Client", controller)
         self.text = None
         self.message_entry = None
+        self.users_box = None
 
     def add_config_widgets(self):
 
@@ -42,9 +43,12 @@ class ClientView(ChadtView):
         username_entry.insert(0, "Enter username here")
         update_username_button = tk.Button(self.root, text="Update Username", command=self.controller.update_username_button(username_entry))
         
+        self.users_box = tk.Listbox(self.root)
+
         self.text.grid(row=0, column=0)
         scroll.grid(row=0, column=1)
 
+        self.users_box.grid(row=0, column=2)
         username_entry.grid(row=0, column=1)
         update_username_button.grid(row=1, column=1)
 
@@ -57,3 +61,10 @@ class ClientView(ChadtView):
 
     def clear_entry_box(self):
         self.message_entry.delete(0, tk.END)
+
+    def update_list_of_users(self, user_list):
+        self.users_box.delete(0,  tk.END)
+        # all added for private messages purposes
+        self.users_box.insert(0, "all")
+        for user in user_list:
+            self.users_box.insert(tk.END, user)

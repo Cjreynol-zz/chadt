@@ -24,6 +24,7 @@ class ClientViewController(ChadtViewController):
     def create_client(self, server_host, server_port):
         self.client = Client(server_host, server_port)
         self.client.add_message_in_queue_observer(self.display_new_text_message)
+        self.client.add_connected_users_observer(self.update_list_of_users)
         self.client.start_client()
 
     def display_new_text_message(self, message_queue):
@@ -53,3 +54,6 @@ class ClientViewController(ChadtViewController):
                 self.view.warning_message("Username Too Long", "Username requested is too long, please limit it to 16 chars")
                 
         return f
+
+    def update_list_of_users(self, user_list):
+        self.view.update_list_of_users(user_list)

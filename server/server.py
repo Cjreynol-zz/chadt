@@ -32,6 +32,8 @@ class Server(MessageHandler):
         self.connection_processor.start()
         self.message_relayer.start()
         super().start()
+
+        self.add_client_list_observer(self.update_clients_user_list)
         log.info("Server started.")
 
     def stop_server(self):
@@ -78,3 +80,8 @@ class Server(MessageHandler):
 
     def add_message_in_queue_observer(self, observer):
         self.message_in_queue.add_observer(observer)
+
+    def update_clients_user_list(self):
+        user_list_string = ','.join(self.clients.keys())
+        user_list_message = Message.construct_list_of_users(user_list_string, "server")
+        self.message_out_queue.append(user_list_message)
