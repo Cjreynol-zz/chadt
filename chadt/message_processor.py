@@ -71,4 +71,4 @@ class MessageProcessor(ChadtComponent):
         elif message.message_type == MessageType.ERROR:
             self.message_handler.handle_error(message)
         else:
-            raise RuntimeError("Unexpected message type.")
+            raise RuntimeError("Unexpected message type of {}.".format(message.message_type))

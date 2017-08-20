@@ -5,7 +5,6 @@ from chadt.chadt_connection import ChadtConnection
 from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameRejectedException, UsernameTooLongException
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
-from chadt.message_type import MessageType
 
 from lib.observed_list import ObservedList
 
@@ -41,9 +40,9 @@ class Client(MessageHandler):
         super().shutdown()
         log.info("Client shut down.")
 
-    def add_message_to_out_queue(self, message_text, message_type = MessageType.TEXT):
+    def add_message_to_out_queue(self, message_text, message_constructor = Message.construct_text):
         if self.username_stable:
-            message = Message(message_text, self.username, message_type)
+            message = message_constructor(message_text, self.username)
             self.message_out_queue.append(message)
         else:
             raise UsernameCurrentlyUnstableException()
@@ -89,7 +88,7 @@ class Client(MessageHandler):
 
     def send_username_request(self, username):
         if self.is_username_valid_length(username):
-            self.add_message_to_out_queue(username, MessageType.USERNAME_REQUEST)
+            self.add_message_to_out_queue(username, Message.construct_username_request)
             self.username_stable = False
         else:
             raise UsernameTooLongException()

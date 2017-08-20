@@ -40,3 +40,14 @@ class Message:
             raise UsernameTooLongException()
         else:
             self._sender = value
+
+
+# dynamically add static constructor functions to Message based on MessageType
+def add_message_func(m_type):
+    def f(message_text, sender):
+        return Message(message_text, sender, m_type)
+    func_name = "construct_" + str(m_type).lower()
+    setattr(Message, func_name, f)
+
+for m_type in MessageType:
+    add_message_func(m_type)

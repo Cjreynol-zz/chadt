@@ -4,11 +4,12 @@ from chadt.chadt_component import ChadtComponent
 from chadt.chadt_exceptions import ZeroLengthMessageException
 from chadt.message import Message
 from chadt.message_processor import MessageProcessor
-from chadt.message_type import MessageType
 
 class ChadtConnection(ChadtComponent):
 
     def __init__(self, username, socket, processing_queue, out_queue = None):
+        # username means something different depending on whether client or 
+        # server is holding the connection
         self.username = username
         self.transceiver = socket
 
@@ -25,7 +26,8 @@ class ChadtConnection(ChadtComponent):
         super().start(self.transceive)
 
     def shutdown(self):
-        self.transmit_message(Message("", self.username, MessageType.DISCONNECT))
+        disconnect_message = Message.construct_disconnect("", self.username)
+        self.transmit_message(disconnect_message)
         super().shutdown(self.transceiver)
 
     def transceive(self):

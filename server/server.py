@@ -2,7 +2,6 @@ import logging as log
 
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
-from chadt.message_type import MessageType
 
 from lib.observed_key_list_dict import ObservedKeyListDict
 from lib.observed_list import ObservedList
@@ -64,17 +63,17 @@ class Server(MessageHandler):
 
     def handle_username_request(self, message):
         username = message.message_text
-        message_type = MessageType.USERNAME_ACCEPTED
+        message_constructor = Message.construct_username_accepted
         recipient = username
 
         if username not in self.clients and self.is_username_valid_length(username):
             self.clients[username] = self.clients.pop(message.sender)
             self.clients[username].username = username
         else:
-            message_type = MessageType.USERNAME_REJECTED
+            message_constructor = Message.construct_username_rejected
             recipient = message.sender
 
-        response_message = Message(username, "server", message_type)
+        response_message = message_constructor(username, "server")
         self.clients[recipient].add_message_to_out_queue(response_message)
 
     def add_message_in_queue_observer(self, observer):
