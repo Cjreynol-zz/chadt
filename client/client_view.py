@@ -4,9 +4,12 @@ from chadt.chadt_view import ChadtView
 
 
 class ClientView(ChadtView):
+    
+    WINDOW_TITLE = "Chadt Client"
+    MESSAGE_ALL_USER = "Send to all users"
 
     def __init__(self, controller):
-        super().__init__("Chadt Client", controller)
+        super().__init__(ClientView.WINDOW_TITLE, controller)
         self.text = None
         self.message_entry = None
         self.users_box = None
@@ -65,6 +68,6 @@ class ClientView(ChadtView):
     def update_list_of_users(self, user_list):
         self.users_box.delete(0,  tk.END)
         # all added for private messages purposes
-        self.users_box.insert(0, "all")
+        self.users_box.insert(0, ClientView.MESSAGE_ALL_USER)
         for user in user_list:
             self.users_box.insert(tk.END, user)

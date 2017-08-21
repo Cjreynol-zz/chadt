@@ -18,25 +18,25 @@ class MessageProcessor(ChadtComponent):
         bytes_header = socket.recv(Message.HEADER_LENGTH)
         if len(bytes_header) == 0:
             raise ZeroLengthMessageException()
-        _, _, _, length = MessageProcessor.decode_header(bytes_header)
+        _, _, _, _, length = MessageProcessor.decode_header(bytes_header)
         bytes_message_text = socket.recv(length)
         return bytes_header + bytes_message_text
     
     @staticmethod
     def bytes_to_message(byte_array):
-        version, message_type, sender, length = MessageProcessor.decode_header(byte_array)
+        version, message_type, sender, recipient, length = MessageProcessor.decode_header(byte_array)
         message_text = byte_array[Message.HEADER_LENGTH:].decode()
-        return Message(message_text, sender, message_type, version)
+        return Message(message_text, sender, recipient, message_type, version)
 
     @staticmethod
     def decode_header(byte_array):
-        version, message_type, sender, length = unpack("BB" + str(Message.SENDER_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
-        return (version, MessageType(message_type), sender.decode().rstrip(), length)
+        version, message_type, sender, recipient, length = unpack("BB" + str(Message.SENDER_MAX_LENGTH) + "s" + str(Message.RECIPIENT_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
+        return (version, MessageType(message_type), sender.decode().rstrip(), recipient.decode().rstrip(), length)
 
     @staticmethod
     def make_bytes(message):
-        pack_string = "BB" + str(Message.SENDER_MAX_LENGTH) + "sH" + str(message.length) + "s"
-        data = pack(pack_string, message.version, int(message.message_type), bytes(message.sender.ljust(Message.SENDER_MAX_LENGTH), "utf-8"), message.length, bytes(message.message_text, "utf-8"))
+        pack_string = "BB" + str(Message.SENDER_MAX_LENGTH) + "s" + str(Message.RECIPIENT_MAX_LENGTH) + "sH" + str(message.length) + "s"
+        data = pack(pack_string, message.version, int(message.message_type), bytes(message.sender.ljust(Message.SENDER_MAX_LENGTH), "utf-8"), bytes(message.recipient.ljust(Message.RECIPIENT_MAX_LENGTH), "utf-8"), message.length, bytes(message.message_text, "utf-8"))
         return data
     
     def __init__(self, message_processing_queue, message_handler):

@@ -75,7 +75,7 @@ class Server(MessageHandler):
             message_constructor = Message.construct_username_rejected
             recipient = message.sender
 
-        response_message = message_constructor(username, "server")
+        response_message = message_constructor(username, Message.SERVER_NAME)
         self.clients[recipient].add_message_to_out_queue(response_message)
 
     def add_message_in_queue_observer(self, observer):
@@ -83,5 +83,5 @@ class Server(MessageHandler):
 
     def update_clients_user_list(self):
         user_list_string = ','.join(self.clients.keys())
-        user_list_message = Message.construct_list_of_users(user_list_string, "server")
+        user_list_message = Message.construct_list_of_users(user_list_string, Message.SERVER_NAME)
         self.message_out_queue.append(user_list_message)
