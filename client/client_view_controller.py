@@ -37,7 +37,7 @@ class ClientViewController(ChadtViewController):
         def f(event = None):
             recipient = self.view.get_users_box_selection()
             self.client.add_message_to_out_queue(message_entry.get(), recipient)
-            self.view.clear_entry_box()
+            self.view.clear_message_entry_box()
         return f
 
     def quit(self):
@@ -46,10 +46,11 @@ class ClientViewController(ChadtViewController):
         self.view.quit()
 
     def update_username_button(self, username_entry):
-        def f():
+        def f(event = None):
             try:
                 requested_username = username_entry.get()
                 self.client.send_username_request(requested_username)
+                self.view.clear_username_entry_box()
             except UsernameCurrentlyUnstableException:
                 self.view.warning_message("Username Unstable", "Username is currently being updated, please wait until it is set to try again.")
             except UsernameTooLongException:

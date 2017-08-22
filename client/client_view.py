@@ -13,6 +13,7 @@ class ClientView(ChadtView):
         super().__init__(ClientView.WINDOW_TITLE, controller)
         self.text = None
         self.message_entry = None
+        self.username_entry = None
         self.users_box = None
 
     def add_config_widgets(self):
@@ -40,12 +41,13 @@ class ClientView(ChadtView):
 
         self.message_entry = tk.Entry(self.root)
         self.message_entry.insert(0, "Enter messages here")
-        self.root.bind("<Return>", self.controller.send_message_button(self.message_entry))
+        self.message_entry.bind("<Return>", self.controller.send_message_button(self.message_entry))
         send_message_button = tk.Button(self.root, text="Send Message", command=self.controller.send_message_button(self.message_entry))
 
-        username_entry = tk.Entry(self.root)
-        username_entry.insert(0, "Enter username here")
-        update_username_button = tk.Button(self.root, text="Update Username", command=self.controller.update_username_button(username_entry))
+        self.username_entry = tk.Entry(self.root)
+        self.username_entry.insert(0, "Enter username here")
+        self.username_entry.bind("<Return>", self.controller.update_username_button(self.username_entry))
+        update_username_button = tk.Button(self.root, text="Update Username", command=self.controller.update_username_button(self.username_entry))
         
         self.users_box = tk.Listbox(self.root)
 
@@ -53,7 +55,7 @@ class ClientView(ChadtView):
         scroll.grid(row=0, column=1)
 
         self.users_box.grid(row=0, column=2)
-        username_entry.grid(row=0, column=1)
+        self.username_entry.grid(row=0, column=1)
         update_username_button.grid(row=1, column=1)
 
         self.message_entry.grid(row=2, column=0)
@@ -63,8 +65,11 @@ class ClientView(ChadtView):
         self.text.insert(tk.END, message+"\n")
         self.text.see(tk.END)
 
-    def clear_entry_box(self):
+    def clear_message_entry_box(self):
         self.message_entry.delete(0, tk.END)
+
+    def clear_username_entry_box(self):
+        self.username_entry.delete(0, tk.END)
 
     def update_list_of_users(self, user_list):
         self.users_box.delete(0,  tk.END)
