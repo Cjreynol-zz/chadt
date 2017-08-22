@@ -25,6 +25,8 @@ class ClientViewController(ChadtViewController):
         self.client = Client(server_host, server_port)
         self.client.add_message_in_queue_observer(self.display_new_text_message)
         self.client.add_connected_users_observer(self.update_list_of_users)
+        self.client.set_username_rejected_observer(self.respond_to_rejected_username)
+        self.client.set_shutdown_observer(self.respond_to_shutdown)
         self.client.start_client()
 
     def display_new_text_message(self, message_queue):
@@ -58,3 +60,10 @@ class ClientViewController(ChadtViewController):
 
     def update_list_of_users(self, user_list):
         self.view.update_list_of_users(user_list)
+
+    def respond_to_rejected_username(self):
+        self.view.warning_message("Username Rejected", "Username requested was rejected by the server.")
+
+    def respond_to_shutdown(self):
+        self.view.warning_message("Server Shutdown", "Server was shutdown, client shutting down now.")
+        self.quit()

@@ -38,6 +38,7 @@ class ChadtComponent:
             self.status = ComponentStatus.STOPPING
 
     def shutdown(self, connection = None):
+        # throws error when connection has already been closed
         if self.status == ComponentStatus.RUNNING or self.status == ComponentStatus.STOPPING:
             self.status = ComponentStatus.SHUTTING_DOWN
         elif self.status == ComponentStatus.STOPPED:

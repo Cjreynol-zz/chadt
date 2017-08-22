@@ -2,7 +2,7 @@ import logging as log
 from socket import socket, SO_REUSEADDR, SOL_SOCKET, timeout
 
 from chadt.chadt_connection import ChadtConnection
-from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameRejectedException, UsernameTooLongException
+from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameTooLongException
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
 
@@ -23,6 +23,9 @@ class Client(MessageHandler):
 
         socket = self.initialize_connection(server_host, server_port)
         self.server_connection = ChadtConnection(self.username, socket, self.message_processing_queue, self.message_out_queue)
+
+        self.shutdown_observer = None
+        self.username_rejected_observer = None
 
         log.info("Client created.")
 
@@ -72,7 +75,10 @@ class Client(MessageHandler):
         self.message_in_queue.append(message)
 
     def handle_disconnect(self, message):
-        self.shutdown_client()
+        if self.shutdown_observer is not None:
+            self.shutdown_observer()
+        else:
+            self.shutdown_client()
 
     def handle_username_accepted(self, message):
         username = message.message_text
@@ -85,7 +91,8 @@ class Client(MessageHandler):
 
     def handle_username_rejected(self, message):
         self.username_stable = True
-        raise UsernameRejectedException()
+        if self.username_rejected_observer is not None:
+            self.username_rejected_observer()
 
     def handle_temp_username_assigned(self, message):
         self.handle_username_accepted(message)
@@ -101,3 +108,9 @@ class Client(MessageHandler):
             self.username_stable = False
         else:
             raise UsernameTooLongException()
+
+    def set_username_rejected_observer(self, observer):
+        self.username_rejected_observer = observer
+
+    def set_shutdown_observer(self, observer):
+        self.shutdown_observer = observer

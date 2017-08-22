@@ -17,10 +17,6 @@ class UsernameCurrentlyUnstableException(ChadtBaseException):
     pass
 
 
-class UsernameRejectedException(ChadtBaseException):
-    pass
-
-
 class UsernameTooLongException(ChadtBaseException):
     pass
 
