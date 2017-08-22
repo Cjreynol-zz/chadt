@@ -35,7 +35,7 @@ class ConnectionProcessor(ChadtComponent):
     def add_new_client(self, username, socket):
         self.server_client_dict[username] = ChadtConnection(username, socket, self.server_processing_queue)
 
-        temp_id_message = Message.construct_temp_username_assigned(username, Message.SERVER_NAME)
+        temp_id_message = Message.construct_temp_username_assigned(username, Message.SERVER_NAME, username)
         self.server_client_dict[username].add_message_to_out_queue(temp_id_message)
         
         self.server_client_dict[username].start()

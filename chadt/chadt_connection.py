@@ -26,7 +26,7 @@ class ChadtConnection(ChadtComponent):
         super().start(self.transceive)
 
     def shutdown(self):
-        disconnect_message = Message.construct_disconnect("", self.username)
+        disconnect_message = Message.construct_disconnect("", self.username, Message.SERVER_NAME)
         self.transmit_message(disconnect_message)
         super().shutdown(self.transceiver)
 

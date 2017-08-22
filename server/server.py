@@ -75,7 +75,7 @@ class Server(MessageHandler):
             message_constructor = Message.construct_username_rejected
             recipient = message.sender
 
-        response_message = message_constructor(username, Message.SERVER_NAME)
+        response_message = message_constructor(username, Message.SERVER_NAME, recipient)
         self.clients[recipient].add_message_to_out_queue(response_message)
 
     def add_message_in_queue_observer(self, observer):

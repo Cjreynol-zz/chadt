@@ -41,9 +41,9 @@ class Client(MessageHandler):
         super().shutdown()
         log.info("Client shut down.")
 
-    def add_message_to_out_queue(self, message_text, message_constructor = Message.construct_text):
+    def add_message_to_out_queue(self, message_text, recipient, message_constructor = Message.construct_text):
         if self.username_stable:
-            message = message_constructor(message_text, self.username)
+            message = message_constructor(message_text, self.username, recipient)
             self.message_out_queue.append(message)
         else:
             raise UsernameCurrentlyUnstableException()
@@ -97,7 +97,7 @@ class Client(MessageHandler):
 
     def send_username_request(self, username):
         if self.is_username_valid_length(username):
-            self.add_message_to_out_queue(username, Message.construct_username_request)
+            self.add_message_to_out_queue(username, Message.SERVER_NAME, Message.construct_username_request)
             self.username_stable = False
         else:
             raise UsernameTooLongException()

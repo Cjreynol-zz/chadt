@@ -1,4 +1,5 @@
 from chadt.chadt_component import ChadtComponent
+from chadt.message import Message
 
 
 class MessageRelayer(ChadtComponent):
@@ -19,4 +20,5 @@ class MessageRelayer(ChadtComponent):
 
     def add_message_to_client_queues(self, message):
         for key, value in self.server_client_dict.items():
-            value.add_message_to_out_queue(message)
+            if message.recipient == Message.ALL_NAME or key in [message.sender, message.recipient]:
+                value.add_message_to_out_queue(message)

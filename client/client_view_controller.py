@@ -33,7 +33,8 @@ class ClientViewController(ChadtViewController):
 
     def send_message_button(self, message_entry):
         def f(event = None):
-            self.client.add_message_to_out_queue(message_entry.get())
+            recipient = self.view.get_users_box_selection()
+            self.client.add_message_to_out_queue(message_entry.get(), recipient)
             self.view.clear_entry_box()
         return f
 

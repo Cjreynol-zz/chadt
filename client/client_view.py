@@ -1,6 +1,7 @@
 import tkinter as tk
 
 from chadt.chadt_view import ChadtView
+from chadt.message import Message
 
 
 class ClientView(ChadtView):
@@ -71,3 +72,13 @@ class ClientView(ChadtView):
         self.users_box.insert(0, ClientView.MESSAGE_ALL_USER)
         for user in user_list:
             self.users_box.insert(tk.END, user)
+
+    def get_users_box_selection(self):
+        selected = self.users_box.curselection()
+        index = 0
+        if selected != ():
+            index = selected
+        recipient = self.users_box.get(index)
+        if recipient == ClientView.MESSAGE_ALL_USER:
+            recipient = Message.ALL_NAME
+        return recipient
