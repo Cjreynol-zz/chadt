@@ -71,6 +71,7 @@ class Server(MessageHandler):
         if username not in self.clients and self.is_username_valid_length(username):
             self.clients[username] = self.clients.pop(message.sender)
             self.clients[username].username = username
+            self.send_username_change(message.sender, username)
         else:
             message_constructor = Message.construct_username_rejected
             recipient = message.sender
@@ -85,3 +86,9 @@ class Server(MessageHandler):
         user_list_string = ','.join(self.clients.keys())
         user_list_message = Message.construct_list_of_users(user_list_string, Message.SERVER_NAME)
         self.message_out_queue.append(user_list_message)
+
+    def send_username_change(self, old_username, new_username):
+        message_text = old_username + " changed username to " + new_username
+        username_change_message = Message.construct_text(message_text, Message.SERVER_NAME)
+        self.message_in_queue.append(username_change_message)
+        self.message_out_queue.append(username_change_message)

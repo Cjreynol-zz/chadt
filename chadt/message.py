@@ -34,7 +34,7 @@ class Message:
         to = ""
         if self.recipient != Message.ALL_NAME:
             to = "(to {})".format(self.recipient)
-        return self.sender + ":  " + self.message_text
+        return self.sender + to + ":  " + self.message_text
 
     def __str__(self):
         return self.sender + ":" + str(self.message_type)
