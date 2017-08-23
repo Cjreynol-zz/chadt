@@ -43,5 +43,5 @@ class ChadtComponent:
             self.status = ComponentStatus.SHUTTING_DOWN
         elif self.status == ComponentStatus.STOPPED:
             self.status = ComponentStatus.SHUT_DOWN
-        if connection is not None:
+        if connection is not None and connection.fileno() != (-1):
             connection.close()
