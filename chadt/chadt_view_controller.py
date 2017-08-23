@@ -2,14 +2,11 @@
 
 class ChadtViewController:
     
-    def __init__(self, view):
-        self.view = view(self)
+    def __init__(self):
+        self.view = None
 
-    def start_view(self):
-        self.view.start()
-
-    def start_main_window(self):
-        self.view.start_main_window()
+    def assign_view(self, view):
+        self.view = view
 
     def is_valid_port_num(self, num):
         return_value = True

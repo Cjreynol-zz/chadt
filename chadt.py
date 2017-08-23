@@ -37,11 +37,11 @@ class LaunchWindow:
     
     def create_server(self):
         s = ServerViewController()
-        s.start_view()
+        s.start_controller()
 
     def create_client(self):
         c = ClientViewController()
-        c.start_view()
+        c.start_controller()
 
 def main():
     l = LaunchWindow()
