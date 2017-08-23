@@ -6,8 +6,7 @@ from chadt.message_handler import MessageHandler
 from lib.observed_key_list_dict import ObservedKeyListDict
 from lib.observed_list import ObservedList
 
-from server.connection_processor import ConnectionProcessor
-from server.listener import Listener
+from server.connection_establisher import ConnectionEstablisher
 from server.message_relayer import MessageRelayer
 
 
@@ -17,19 +16,16 @@ class Server(MessageHandler):
         super().__init__()
 
         self.clients = ObservedKeyListDict()
-        self.new_connections = []
         self.message_out_queue = []
         self.message_in_queue = ObservedList()
 
-        self.listener = Listener(self.new_connections, port)
-        self.connection_processor = ConnectionProcessor(self.new_connections, self.clients, self.message_processing_queue)
+        self.connection_establisher = ConnectionEstablisher(port, self.clients, self.message_processing_queue)
         self.message_relayer = MessageRelayer(self.message_out_queue, self.clients)
 
         log.info("Server created listening at port {}.".format(port))
 
     def start_server(self):
-        self.listener.start()
-        self.connection_processor.start()
+        self.connection_establisher.start()
         self.message_relayer.start()
         super().start()
 
@@ -37,15 +33,13 @@ class Server(MessageHandler):
         log.info("Server started.")
 
     def stop_server(self):
-        self.listener.stop()
-        self.connection_processor.stop()
+        self.connection_establisher.stop()
         self.message_relayer.stop()
         super().stop()
         log.info("Server stopped.")
 
     def shutdown_server(self):
-        self.listener.shutdown()
-        self.connection_processor.shutdown()
+        self.connection_establisher.shutdown()
         self.message_relayer.shutdown()
         for client_connection in self.clients.values():
             client_connection.shutdown()
