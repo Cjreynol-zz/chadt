@@ -28,7 +28,7 @@ class Message:
         self.sender = sender
         self.recipient = recipient
         self.version = version
-        self.message_type = message_type
+        self.message_type = MessageType(message_type)
 
     def display_string(self):
         to = ""

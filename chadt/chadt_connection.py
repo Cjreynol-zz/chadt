@@ -1,57 +1,84 @@
-from socket import timeout
+from socket import socket, SO_REUSEADDR, SOL_SOCKET
+from struct import pack, unpack
 
-from chadt.chadt_component import ChadtComponent
 from chadt.chadt_exceptions import ZeroLengthMessageException
+from chadt.connection_status import ConnectionStatus
 from chadt.message import Message
-from chadt.message_processor import MessageProcessor
 
-class ChadtConnection(ChadtComponent):
 
-    def __init__(self, username, socket, processing_queue, out_queue = None):
-        # username means something different depending on whether client or 
-        # server is holding the connection
-        self.username = username
-        self.transceiver = socket
+class ChadtConnection:
 
-        self.processing_queue = processing_queue
-        # None signifies that the out_queue is local to the connection
-        if out_queue is not None:
-            self.out_queue = out_queue
-        else:
-            self.out_queue = []
+    SOCKET_TIMEOUT = 0.05
+    
+    def __init__(self, port = None, server_host = None, connected_socket = None):
+        self.port = port
+        self.server_host = server_host
 
-        super().__init__()
+        self.socket = connected_socket
+        if self.socket is None:
+            self.socket = socket()
+        self._set_socket_options()
+
+        self.status = ConnectionStatus.UNINITIALIZED
 
     def start(self):
-        super().start(self.transceive)
+        if self.status == ConnectionStatus.UNINITIALIZED:
+            if self.server_host is not None:
+                self._connect_socket(self.server_host, self.port)
+            elif self.port is not None:
+                self._start_listening_socket(self.port)
+            self.status = ConnectionStatus.CONNECTED
 
     def shutdown(self):
-        disconnect_message = Message.construct_disconnect("", self.username, Message.SERVER_NAME)
-        self.transmit_message(disconnect_message)
-        super().shutdown(self.transceiver)
-
-    def transceive(self):
-        self.receive_messages()
-        self.transmit_messages()
-
-    def transmit_messages(self):
-        if len(self.out_queue) > 0:
-            message = self.out_queue.pop(0)
-            self.transmit_message(message)
+        if self.status == ConnectionStatus.CONNECTED:
+            self._close_socket()
+            self.status = ConnectionStatus.CLOSED
 
     def transmit_message(self, message):
-        bytes_message = MessageProcessor.make_bytes(message)
-        self.transceiver.sendall(bytes_message)
+        bytes_message = self._make_bytes(message)
+        self.socket.sendall(bytes_message)
+        
+    def receive_message(self):
+        bytes_message = self._receive_message_bytes()
+        message = self._bytes_to_message(bytes_message)
+        return message
 
-    def receive_messages(self):
-        try:
-            bytes_message = MessageProcessor.receive_message_bytes(self.transceiver)
-            self.add_message_to_processing_queue(bytes_message)
-        except (timeout, ZeroLengthMessageException):
-            pass
+    def accept_connections(self):
+        return self.socket.accept()
 
-    def add_message_to_processing_queue(self, message):
-        self.processing_queue.append(message)
+    def _set_socket_options(self):
+        self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self.socket.settimeout(ChadtConnection.SOCKET_TIMEOUT)
 
-    def add_message_to_out_queue(self, message):
-        self.out_queue.append(message)
+    def _connect_socket(self, server_host, server_port):
+        self.socket.connect((server_host, server_port))
+
+    def _start_listening_socket(self, server_port):
+        self.socket.bind(("", server_port))
+        self.socket.listen()
+
+    def _close_socket(self):
+        self.socket.close()
+
+    def _receive_message_bytes(self):
+        bytes_header = self.socket.recv(Message.HEADER_LENGTH)
+        if len(bytes_header) == 0:
+            raise ZeroLengthMessageException()
+        _, _, _, _, length = self._decode_header(bytes_header)
+        bytes_message_text = self.socket.recv(length)
+        return bytes_header + bytes_message_text
+    
+    def _bytes_to_message(self, byte_array):
+        unpacked_tuple = self._decode_header(byte_array)
+        version, message_type, sender, recipient, length = unpacked_tuple
+        message_text = byte_array[Message.HEADER_LENGTH:]
+        return Message(message_text.decode(), sender.decode().rstrip(), recipient.decode().rstrip(), message_type, version)
+
+    def _decode_header(self, byte_array):
+        unpacked_tuple = unpack("BB" + str(Message.SENDER_MAX_LENGTH) + "s" + str(Message.RECIPIENT_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
+        return unpacked_tuple
+
+    def _make_bytes(self, message):
+        pack_string = "BB" + str(Message.SENDER_MAX_LENGTH) + "s" + str(Message.RECIPIENT_MAX_LENGTH) + "sH" + str(message.length) + "s"
+        data = pack(pack_string, message.version, int(message.message_type), bytes(message.sender.ljust(Message.SENDER_MAX_LENGTH), "utf-8"), bytes(message.recipient.ljust(Message.RECIPIENT_MAX_LENGTH), "utf-8"), message.length, bytes(message.message_text, "utf-8"))
+        return data

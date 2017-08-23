@@ -8,7 +8,6 @@ from chadt.component_status import ComponentStatus
 class ChadtComponent:
 
     THREAD_SLEEP_TIME = 0.05
-    SOCKET_TIMEOUT = 0.05
     
     def __init__(self):
         self.status = ComponentStatus.STOPPED
@@ -37,11 +36,8 @@ class ChadtComponent:
         if self.status == ComponentStatus.RUNNING:
             self.status = ComponentStatus.STOPPING
 
-    def shutdown(self, connection = None):
-        # throws error when connection has already been closed
+    def shutdown(self):
         if self.status == ComponentStatus.RUNNING or self.status == ComponentStatus.STOPPING:
             self.status = ComponentStatus.SHUTTING_DOWN
         elif self.status == ComponentStatus.STOPPED:
             self.status = ComponentStatus.SHUT_DOWN
-        if connection is not None and connection.fileno() != (-1):
-            connection.close()
