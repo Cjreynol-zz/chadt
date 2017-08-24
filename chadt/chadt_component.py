@@ -3,12 +3,11 @@ from time import sleep
 
 from chadt.chadt_exceptions import ComponentStoppingException, ComponentShuttingDownException
 from chadt.component_status import ComponentStatus
+from chadt.constants import THREAD_SLEEP_TIME
 
 
 class ChadtComponent:
 
-    THREAD_SLEEP_TIME = 0.05
-    
     def __init__(self):
         self.status = ComponentStatus.STOPPED
 
@@ -25,7 +24,7 @@ class ChadtComponent:
         def f():
             while self.status == ComponentStatus.RUNNING:
                 target_func()
-                sleep(ChadtComponent.THREAD_SLEEP_TIME)
+                sleep(THREAD_SLEEP_TIME)
             if self.status == ComponentStatus.STOPPING:
                 self.status = ComponentStatus.STOPPED
             elif self.status == ComponentStatus.SHUTTING_DOWN:

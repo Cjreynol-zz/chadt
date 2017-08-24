@@ -1,5 +1,6 @@
 import logging as log
 
+from chadt.constants import SERVER_NAME
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
 
@@ -70,7 +71,7 @@ class Server(MessageHandler):
             message_constructor = Message.construct_username_rejected
             recipient = message.sender
 
-        response_message = message_constructor(username, Message.SERVER_NAME, recipient)
+        response_message = message_constructor(username, SERVER_NAME, recipient)
         self.clients[recipient].add_message_to_out_queue(response_message)
 
     def add_message_in_queue_observer(self, observer):
@@ -78,11 +79,11 @@ class Server(MessageHandler):
 
     def update_clients_user_list(self):
         user_list_string = ','.join(self.clients.keys())
-        user_list_message = Message.construct_list_of_users(user_list_string, Message.SERVER_NAME)
+        user_list_message = Message.construct_list_of_users(user_list_string, SERVER_NAME)
         self.message_out_queue.append(user_list_message)
 
     def send_username_change(self, old_username, new_username):
         message_text = old_username + " changed username to " + new_username
-        username_change_message = Message.construct_text(message_text, Message.SERVER_NAME)
+        username_change_message = Message.construct_text(message_text, SERVER_NAME)
         self.message_in_queue.append(username_change_message)
         self.message_out_queue.append(username_change_message)

@@ -1,7 +1,7 @@
 from tkinter import Button, END, Entry, Label, Listbox, Scrollbar, Text
 
 from chadt.chadt_view import ChadtView
-from chadt.message import Message
+from chadt.constants import ALL_NAME
 
 
 class ClientChatView(ChadtView):
@@ -88,5 +88,5 @@ class ClientChatView(ChadtView):
             index = selected
         recipient = self.user_list.get(index)
         if recipient == self.MESSAGE_ALL_USER:
-            recipient = Message.ALL_NAME
+            recipient = ALL_NAME
         return recipient

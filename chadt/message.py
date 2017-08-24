@@ -10,18 +10,14 @@ message - length
 
 
 from chadt.chadt_exceptions import UsernameTooLongException
+from chadt.constants import ALL_NAME, RECIPIENT_MAX_LENGTH, SENDER_MAX_LENGTH, SERVER_NAME
 from chadt.message_type import MessageType
 
 
 class Message:
 
     HEADER_LENGTH = 1 + 1 + 16 + 16 + 2
-    SENDER_MAX_LENGTH = 16
-    RECIPIENT_MAX_LENGTH = SENDER_MAX_LENGTH
 
-    SERVER_NAME = "SERVER_NAME_____"
-    ALL_NAME = "TARGET_ALL_USERS"
-     
     def __init__(self, message_text, sender, recipient = ALL_NAME, message_type = MessageType.TEXT, version = 0):
         self.message_text = message_text
         self.length = len(message_text)
@@ -32,7 +28,7 @@ class Message:
 
     def display_string(self):
         to = ""
-        if self.recipient != Message.ALL_NAME:
+        if self.recipient != ALL_NAME:
             to = "(to {})".format(self.recipient)
         return self.sender + to + ":  " + self.message_text
 
@@ -45,7 +41,7 @@ class Message:
 
     @sender.setter
     def sender(self, value):
-        if len(value) > Message.SENDER_MAX_LENGTH:
+        if len(value) > SENDER_MAX_LENGTH:
             raise UsernameTooLongException()
         else:
             self._sender = value
@@ -56,7 +52,7 @@ class Message:
 
     @recipient.setter
     def recipient(self, value):
-        if len(value) > Message.RECIPIENT_MAX_LENGTH:
+        if len(value) > RECIPIENT_MAX_LENGTH:
             raise UsernameTooLongException()
         else:
             self._recipient = value
@@ -64,7 +60,7 @@ class Message:
 
 # dynamically add static constructor functions to Message based on MessageType
 def add_message_func(m_type):
-    def f(message_text, sender, recipient = Message.ALL_NAME):
+    def f(message_text, sender, recipient = ALL_NAME):
         return Message(message_text, sender, recipient, m_type)
     func_name = "construct_" + str(m_type).lower()
     setattr(Message, func_name, f)

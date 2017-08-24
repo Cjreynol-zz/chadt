@@ -3,13 +3,12 @@ from struct import pack, unpack
 
 from chadt.chadt_exceptions import ZeroLengthMessageException
 from chadt.connection_status import ConnectionStatus
+from chadt.constants import RECIPIENT_MAX_LENGTH, SENDER_MAX_LENGTH, SOCKET_TIMEOUT
 from chadt.message import Message
 
 
 class ChadtConnection:
 
-    SOCKET_TIMEOUT = 0.05
-    
     def __init__(self, port = None, server_host = None, connected_socket = None):
         self.port = port
         self.server_host = server_host
@@ -48,7 +47,7 @@ class ChadtConnection:
 
     def _set_socket_options(self):
         self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self.socket.settimeout(ChadtConnection.SOCKET_TIMEOUT)
+        self.socket.settimeout(SOCKET_TIMEOUT)
 
     def _connect_socket(self, server_host, server_port):
         self.socket.connect((server_host, server_port))
@@ -75,10 +74,10 @@ class ChadtConnection:
         return Message(message_text.decode(), sender.decode().rstrip(), recipient.decode().rstrip(), message_type, version)
 
     def _decode_header(self, byte_array):
-        unpacked_tuple = unpack("BB" + str(Message.SENDER_MAX_LENGTH) + "s" + str(Message.RECIPIENT_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
+        unpacked_tuple = unpack("BB" + str(SENDER_MAX_LENGTH) + "s" + str(RECIPIENT_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
         return unpacked_tuple
 
     def _make_bytes(self, message):
-        pack_string = "BB" + str(Message.SENDER_MAX_LENGTH) + "s" + str(Message.RECIPIENT_MAX_LENGTH) + "sH" + str(message.length) + "s"
-        data = pack(pack_string, message.version, int(message.message_type), bytes(message.sender.ljust(Message.SENDER_MAX_LENGTH), "utf-8"), bytes(message.recipient.ljust(Message.RECIPIENT_MAX_LENGTH), "utf-8"), message.length, bytes(message.message_text, "utf-8"))
+        pack_string = "BB" + str(SENDER_MAX_LENGTH) + "s" + str(RECIPIENT_MAX_LENGTH) + "sH" + str(message.length) + "s"
+        data = pack(pack_string, message.version, int(message.message_type), bytes(message.sender.ljust(SENDER_MAX_LENGTH), "utf-8"), bytes(message.recipient.ljust(RECIPIENT_MAX_LENGTH), "utf-8"), message.length, bytes(message.message_text, "utf-8"))
         return data

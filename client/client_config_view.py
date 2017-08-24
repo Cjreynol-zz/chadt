@@ -1,14 +1,13 @@
 from tkinter import Button, Entry, Label
 
 from chadt.chadt_view import ChadtView
+from chadt.constants import DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT
 
 
 class ClientConfigView(ChadtView):
     
     WINDOW_TITLE = "Chadt Client Config"
     LABEL_TEXT = "Enter Server host/port:"
-    HOST_DEFAULT = "localhost"
-    PORT_DEFAULT = "50000"
     CONFIRM_BUTTON_LABEL = "Confirm"
     
     def __init__(self):
@@ -26,10 +25,10 @@ class ClientConfigView(ChadtView):
         self.label = Label(self.root, text = self.LABEL_TEXT)
 
         self.host_entry = Entry(self.root)
-        self.host_entry.insert(0, self.HOST_DEFAULT)
+        self.host_entry.insert(0, DEFAULT_SERVER_HOST)
 
         self.port_entry = Entry(self.root)
-        self.port_entry.insert(0, self.PORT_DEFAULT)
+        self.port_entry.insert(0, DEFAULT_SERVER_PORT)
 
         self.confirm_button = Button(self.root, text = self.CONFIRM_BUTTON_LABEL)
 

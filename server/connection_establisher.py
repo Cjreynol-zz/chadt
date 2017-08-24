@@ -3,13 +3,12 @@ from socket import timeout
 from chadt.chadt_component import ChadtComponent
 from chadt.chadt_connection import ChadtConnection
 from chadt.chadt_connection_handler import ChadtConnectionHandler
+from chadt.constants import DEFAULT_USERNAME_BASE, SERVER_NAME
 from chadt.message import Message
 
 
 class ConnectionEstablisher(ChadtComponent):
 
-    DEFAULT_USERNAME_BASE = "User"
-    
     def __init__(self, listening_port, server_client_dict, server_processing_queue):
         self.listener = ChadtConnection(listening_port)
         self.server_connections = []
@@ -44,7 +43,7 @@ class ConnectionEstablisher(ChadtComponent):
             new_socket, address  = self.server_connections.pop(0)
             connection = ChadtConnection(connected_socket = new_socket)
 
-            username = ConnectionEstablisher.DEFAULT_USERNAME_BASE + str(self.temp_id_counter)
+            username = DEFAULT_USERNAME_BASE + str(self.temp_id_counter)
             self.temp_id_counter += 1
 
             self.add_new_client(username, connection)
@@ -52,7 +51,7 @@ class ConnectionEstablisher(ChadtComponent):
     def add_new_client(self, username, connection):
         self.server_client_dict[username] = ChadtConnectionHandler(username, connection, self.server_processing_queue)
 
-        temp_id_message = Message.construct_temp_username_assigned(username, Message.SERVER_NAME, username)
+        temp_id_message = Message.construct_temp_username_assigned(username, SERVER_NAME, username)
         self.server_client_dict[username].add_message_to_out_queue(temp_id_message)
         
         self.server_client_dict[username].start()
