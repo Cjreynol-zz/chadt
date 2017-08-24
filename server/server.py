@@ -1,13 +1,14 @@
 import logging as log
 
-from chadt.constants import SERVER_NAME
+from chadt.chadt_connection_handler import ChadtConnectionHandler
+from chadt.constants import DEFAULT_USERNAME_BASE, SERVER_NAME
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
 
 from lib.observed_key_list_dict import ObservedKeyListDict
 from lib.observed_list import ObservedList
 
-from server.connection_establisher import ConnectionEstablisher
+from server.listener import Listener
 from server.message_relayer import MessageRelayer
 
 
@@ -20,27 +21,31 @@ class Server(MessageHandler):
         self.message_out_queue = []
         self.message_in_queue = ObservedList()
 
-        self.connection_establisher = ConnectionEstablisher(port, self.clients, self.message_processing_queue)
+        self.connections = ObservedList()
+        self.temp_id_counter = 0
+
+        self.listener = Listener(port, self.connections)
         self.message_relayer = MessageRelayer(self.message_out_queue, self.clients)
 
         log.info("Server created listening at port {}.".format(port))
 
     def start_server(self):
-        self.connection_establisher.start()
+        self.listener.start()
         self.message_relayer.start()
         super().start()
 
         self.add_client_list_observer(self.update_clients_user_list)
+        self.add_connection_queue_observer(self.add_new_client)
         log.info("Server started.")
 
     def stop_server(self):
-        self.connection_establisher.stop()
+        self.listener.stop()
         self.message_relayer.stop()
         super().stop()
         log.info("Server stopped.")
 
     def shutdown_server(self):
-        self.connection_establisher.shutdown()
+        self.listener.shutdown()
         self.message_relayer.shutdown()
         for client_connection in self.clients.values():
             client_connection.shutdown()
@@ -77,6 +82,9 @@ class Server(MessageHandler):
     def add_message_in_queue_observer(self, observer):
         self.message_in_queue.add_observer(observer)
 
+    def add_connection_queue_observer(self, observer):
+        self.connections.add_observer(observer)
+
     def update_clients_user_list(self):
         user_list_string = ','.join(self.clients.keys())
         user_list_message = Message.construct_list_of_users(user_list_string, SERVER_NAME)
@@ -87,3 +95,18 @@ class Server(MessageHandler):
         username_change_message = Message.construct_text(message_text, SERVER_NAME)
         self.message_in_queue.append(username_change_message)
         self.message_out_queue.append(username_change_message)
+
+    def get_next_temp_id(self):
+        username = DEFAULT_USERNAME_BASE + str(self.temp_id_counter)
+        self.temp_id_counter += 1
+        return username
+
+    def add_new_client(self, connection_list):
+        connection = connection_list.pop(0)
+        username = self.get_next_temp_id()
+        self.clients[username] = ChadtConnectionHandler(username, connection, self.message_processing_queue)
+
+        temp_id_message = Message.construct_temp_username_assigned(username, SERVER_NAME, username)
+        self.clients[username].add_message_to_out_queue(temp_id_message)
+        
+        self.clients[username].start()

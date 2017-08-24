@@ -27,6 +27,7 @@ class ChadtConnectionHandler(ChadtComponent):
         super().start(self.transceive)
 
     def shutdown(self):
+        # this is not always the case, if the connection is on the server-side
         disconnect_message = Message.construct_disconnect("", self.username, SERVER_NAME)
         self.transceiver.transmit_message(disconnect_message)
         self.transceiver.shutdown()
