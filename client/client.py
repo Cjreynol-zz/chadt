@@ -41,7 +41,8 @@ class Client(MessageHandler):
         log.info("Client stopped.")
 
     def shutdown_client(self):
-        self.server_connection.shutdown()
+        disconnect_message = Message.construct_disconnect("", self.username, SERVER_NAME)
+        self.server_connection.shutdown(disconnect_message)
         super().shutdown()
         log.info("Client shut down.")
 

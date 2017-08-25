@@ -46,8 +46,10 @@ class Server(MessageHandler):
     def shutdown_server(self):
         self.listener.shutdown()
         self.message_relayer.shutdown()
+
+        disconnect_message = Message.construct_disconnect("", SERVER_NAME)
         for client_connection in self.clients.values():
-            client_connection.shutdown()
+            client_connection.shutdown(disconnect_message)
         super().shutdown()
         log.info("Server shut down.")
     
@@ -60,7 +62,8 @@ class Server(MessageHandler):
 
     def handle_disconnect(self, message):
         username = message.sender
-        self.clients[username].shutdown()
+        disconnect_message = Message.construct_disconnect("", SERVER_NAME)
+        self.clients[username].shutdown(disconnect_message)
         del self.clients[username]
         self.send_user_disconnect(username)
 

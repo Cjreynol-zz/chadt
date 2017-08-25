@@ -1,10 +1,7 @@
 from socket import timeout
 
-from chadt.chadt_connection import ChadtConnection
-from chadt.constants import SERVER_NAME
 from chadt.chadt_component import ChadtComponent
 from chadt.chadt_exceptions import ZeroLengthMessageException
-from chadt.message import Message
 
 
 class ChadtConnectionHandler(ChadtComponent):
@@ -26,9 +23,7 @@ class ChadtConnectionHandler(ChadtComponent):
         self.transceiver.start()
         super().start(self.transceive)
 
-    def shutdown(self):
-        # this is not always the case, if the connection is on the server-side
-        disconnect_message = Message.construct_disconnect("", self.username, SERVER_NAME)
+    def shutdown(self, disconnect_message):
         self.transceiver.transmit_message(disconnect_message)
         self.transceiver.shutdown()
         super().shutdown()
