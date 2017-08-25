@@ -1,7 +1,7 @@
 import logging as log
 
-from chadt.chadt_connection import ChadtConnection
-from chadt.chadt_connection_handler import ChadtConnectionHandler
+from chadt.connection import Connection
+from chadt.connection_handler import ConnectionHandler
 from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameTooLongException
 from chadt.constants import SERVER_NAME
 from chadt.message import Message
@@ -22,8 +22,8 @@ class Client(MessageHandler):
         self.message_out_queue = []
         self.connected_users = ObservedList()
 
-        connection = ChadtConnection(server_port, server_host)
-        self.server_connection = ChadtConnectionHandler(self.username, connection, self.message_processing_queue, self.message_out_queue)
+        connection = Connection(server_port, server_host)
+        self.server_connection = ConnectionHandler(self.username, connection, self.message_processing_queue, self.message_out_queue)
 
         self.shutdown_observer = None
         self.username_rejected_observer = None

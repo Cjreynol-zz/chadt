@@ -1,10 +1,10 @@
 from tkinter import Button, END, Entry, Label, Listbox, Scrollbar, Text
 
-from chadt.chadt_view import ChadtView
+from chadt.view import View
 from chadt.constants import ALL_NAME
 
 
-class ClientChatView(ChadtView):
+class ClientChatView(View):
     
     WINDOW_TITLE = "Chadt Chat"
     CHAT_HEIGHT = 10

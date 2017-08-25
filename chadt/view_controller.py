@@ -1,6 +1,6 @@
 
 
-class ChadtViewController:
+class ViewController:
     
     def __init__(self):
         self.view = None

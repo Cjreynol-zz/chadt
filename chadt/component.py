@@ -6,7 +6,7 @@ from chadt.component_status import ComponentStatus
 from chadt.constants import THREAD_SLEEP_TIME
 
 
-class ChadtComponent:
+class Component:
 
     def __init__(self):
         self.status = ComponentStatus.STOPPED

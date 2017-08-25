@@ -1,4 +1,4 @@
-from chadt.chadt_view_controller import ChadtViewController
+from chadt.view_controller import ViewController
 from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameTooLongException
 
 from client.client import Client
@@ -6,7 +6,7 @@ from client.client_chat_view import ClientChatView
 from client.client_config_view import ClientConfigView
 
 
-class ClientViewController(ChadtViewController):
+class ClientViewController(ViewController):
     
     def __init__(self):
         super().__init__()

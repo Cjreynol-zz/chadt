@@ -1,5 +1,6 @@
 import logging as log
-import tkinter as tk
+
+from tkinter import Button, Tk, Toplevel
 from tkinter.messagebox import askokcancel
 
 from client.client_view_controller import ClientViewController
@@ -15,17 +16,17 @@ class LaunchWindow:
         self.child_controllers = []
 
     def start_tkinter(self):
-        self.root = tk.Tk()
+        self.root = Tk()
         self.root.withdraw()
 
     def start_window(self):
-        self.main_window = tk.Tk()
+        self.main_window = Toplevel()
         self.main_window.title("Chadt")
         
         self.main_window.protocol("WM_DELETE_WINDOW", self.quit)
 
-        server_button = tk.Button(self.main_window, text="Create Server", command=self.create_server)
-        client_button = tk.Button(self.main_window, text="Create Client", command=self.create_client)
+        server_button = Button(self.main_window, text="Create Server", command=self.create_server)
+        client_button = Button(self.main_window, text="Create Client", command=self.create_client)
 
         server_button.grid(row=0, column=0)
         client_button.grid(row=0, column=1)

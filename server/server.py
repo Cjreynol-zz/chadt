@@ -1,6 +1,6 @@
 import logging as log
 
-from chadt.chadt_connection_handler import ChadtConnectionHandler
+from chadt.connection_handler import ConnectionHandler
 from chadt.constants import DEFAULT_USERNAME_BASE, SERVER_NAME
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
@@ -114,7 +114,7 @@ class Server(MessageHandler):
         username = self.get_next_temp_id()
         current_users = ",".join(self.clients.keys())
 
-        self.clients[username] = ChadtConnectionHandler(username, connection, self.message_processing_queue, is_server_connection = True)
+        self.clients[username] = ConnectionHandler(username, connection, self.message_processing_queue, is_server_connection = True)
 
         temp_id_message = Message.construct_temp_username_assigned(username, SERVER_NAME, username)
         self.clients[username].add_message_to_out_queue(temp_id_message)

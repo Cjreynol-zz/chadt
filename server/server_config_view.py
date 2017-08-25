@@ -1,10 +1,10 @@
 from tkinter import Button, Entry, Label
 
-from chadt.chadt_view import ChadtView
+from chadt.view import View
 from chadt.constants import DEFAULT_SERVER_PORT
 
 
-class ServerConfigView(ChadtView):
+class ServerConfigView(View):
 
     WINDOW_TITLE = "Chadt Server Config"
     LABEL_TEXT = "Enter Port:"

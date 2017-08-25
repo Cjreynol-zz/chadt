@@ -1,10 +1,10 @@
 from socket import timeout
 
-from chadt.chadt_component import ChadtComponent
+from chadt.component import Component
 from chadt.chadt_exceptions import ZeroLengthMessageException
 
 
-class ChadtConnectionHandler(ChadtComponent):
+class ConnectionHandler(Component):
 
     def __init__(self, username, connection, processing_queue, out_queue = None, is_server_connection = False):
         self.username = username

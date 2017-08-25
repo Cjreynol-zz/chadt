@@ -1,8 +1,8 @@
-from chadt.chadt_component import ChadtComponent
+from chadt.component import Component
 from chadt.constants import ALL_NAME
 
 
-class MessageRelayer(ChadtComponent):
+class MessageRelayer(Component):
     
     def __init__(self, server_out_queue, server_client_dict):
         self.server_out_queue = server_out_queue

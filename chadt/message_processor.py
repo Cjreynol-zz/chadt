@@ -1,11 +1,11 @@
 from struct import pack, unpack
 
-from chadt.chadt_component import ChadtComponent
+from chadt.component import Component
 from chadt.chadt_exceptions import ZeroLengthMessageException
 from chadt.message_type import MessageType
 
 
-class MessageProcessor(ChadtComponent):
+class MessageProcessor(Component):
 
     
     def __init__(self, message_processing_queue, message_handler):

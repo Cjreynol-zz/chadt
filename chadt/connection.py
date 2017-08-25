@@ -7,7 +7,7 @@ from chadt.constants import RECIPIENT_MAX_LENGTH, SENDER_MAX_LENGTH, SOCKET_TIME
 from chadt.message import Message
 
 
-class ChadtConnection:
+class Connection:
 
     def __init__(self, port = None, server_host = None, connected_socket = None):
         self.port = port

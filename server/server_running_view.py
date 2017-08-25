@@ -1,9 +1,9 @@
 from tkinter import Button, END, Label, Listbox, Scrollbar, Text
 
-from chadt.chadt_view import ChadtView
+from chadt.view import View
 
 
-class ServerRunningView(ChadtView):
+class ServerRunningView(View):
     
     WINDOW_TITLE = "Chadt Server"
     LABEL_TEXT = "Connected Clients:"

@@ -1,7 +1,7 @@
 from tkinter import Toplevel
 from tkinter.messagebox import showwarning
 
-class ChadtView:
+class View:
 
     def __init__(self, window_title):
         self.root = self.initialize_root(window_title)

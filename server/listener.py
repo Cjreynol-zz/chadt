@@ -1,13 +1,13 @@
 from socket import timeout
 
-from chadt.chadt_component import ChadtComponent
-from chadt.chadt_connection import ChadtConnection
+from chadt.component import Component
+from chadt.connection import Connection
 
 
-class Listener(ChadtComponent):
+class Listener(Component):
 
     def __init__(self, listening_port, new_connections): 
-        self.listening_connection = ChadtConnection(listening_port)
+        self.listening_connection = Connection(listening_port)
         self.new_connections = new_connections
 
         super().__init__()
@@ -29,5 +29,5 @@ class Listener(ChadtComponent):
 
     def process_connection(self, connection):
         new_socket, address  = connection
-        connection = ChadtConnection(connected_socket = new_socket)
+        connection = Connection(connected_socket = new_socket)
         self.new_connections.append(connection)

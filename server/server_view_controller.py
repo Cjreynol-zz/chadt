@@ -1,11 +1,11 @@
-from chadt.chadt_view_controller import ChadtViewController
+from chadt.view_controller import ViewController
 
 from server.server import Server
 from server.server_config_view import ServerConfigView
 from server.server_running_view import ServerRunningView
 
 
-class ServerViewController(ChadtViewController):
+class ServerViewController(ViewController):
 
     def __init__(self):
         super().__init__()
