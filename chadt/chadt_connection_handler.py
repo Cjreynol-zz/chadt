@@ -6,10 +6,11 @@ from chadt.chadt_exceptions import ZeroLengthMessageException
 
 class ChadtConnectionHandler(ChadtComponent):
 
-    def __init__(self, username, connection, processing_queue, out_queue = None):
+    def __init__(self, username, connection, processing_queue, out_queue = None, is_server_connection = False):
         self.username = username
         self.transceiver = connection
         self.processing_queue = processing_queue
+        self.is_server_connection = is_server_connection
 
         # None signifies that the out_queue is local to the connection
         if out_queue is not None:
@@ -23,8 +24,9 @@ class ChadtConnectionHandler(ChadtComponent):
         self.transceiver.start()
         super().start(self.transceive)
 
-    def shutdown(self, disconnect_message):
-        self.transceiver.transmit_message(disconnect_message)
+    def shutdown(self, disconnect_message = None):
+        if disconnect_message is not None:
+            self.transceiver.transmit_message(disconnect_message)
         self.transceiver.shutdown()
         super().shutdown()
 
@@ -40,8 +42,10 @@ class ChadtConnectionHandler(ChadtComponent):
     def receive_messages(self):
         try:
             message = self.transceiver.receive_message()
-            self.add_message_to_processing_queue(message)
-        except (timeout, ZeroLengthMessageException):
+            # represents the server checking that usernames match senders
+            if not self.is_server_connection or message.sender == self.username:
+                self.add_message_to_processing_queue(message)
+        except (timeout, ZeroLengthMessageException, OSError):
             pass
 
     def add_message_to_processing_queue(self, message):
