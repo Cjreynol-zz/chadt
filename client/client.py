@@ -85,9 +85,23 @@ class Client(MessageHandler):
         self.handle_username_accepted(message)
 
     def handle_list_of_users(self, message):
-        self.connected_users.clear()
-        for user in message.message_text.split(','):
-            self.connected_users.append(user)
+        list_of_users = message.message_text.split(',')
+        self.connected_users.merge(list_of_users)
+
+    def handle_user_connect(self, message):
+        username = message.message_text
+        self.connected_users.append(username)
+        self.message_in_queue.append(message)
+
+    def handle_user_name_change(self, message):
+        old, new = message.message_text.split(',')
+        self.connected_users.replace(old, new)
+        self.message_in_queue.append(message)
+
+    def handle_user_disconnect(self, message):
+        username = message.message_text
+        self.connected_users.remove(username)
+        self.message_in_queue.append(message)
 
     def send_username_request(self, username):
         if self.is_username_valid_length(username):

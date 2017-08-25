@@ -53,4 +53,4 @@ class ServerViewController(ChadtViewController):
 
     def display_new_text_message(self, message_queue):
         message = message_queue.pop(0)
-        self.view.display_new_text_message(message.display_string())
+        self.view.display_new_text_message(message.get_display_string())

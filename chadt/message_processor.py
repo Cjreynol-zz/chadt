@@ -37,6 +37,12 @@ class MessageProcessor(ChadtComponent):
             self.message_handler.handle_temp_username_assigned(message)
         elif message.message_type == MessageType.LIST_OF_USERS:
             self.message_handler.handle_list_of_users(message)
+        elif message.message_type == MessageType.USER_CONNECT:
+            self.message_handler.handle_user_connect(message)
+        elif message.message_type == MessageType.USER_NAME_CHANGE:
+            self.message_handler.handle_user_name_change(message)
+        elif message.message_type == MessageType.USER_DISCONNECT:
+            self.message_handler.handle_user_disconnect(message)
         elif message.message_type == MessageType.ERROR:
             self.message_handler.handle_error(message)
         else:

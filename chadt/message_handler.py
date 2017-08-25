@@ -46,5 +46,14 @@ class MessageHandler:
     def handle_list_of_users(self, message):
         self.raise_unhandled_warning()
 
+    def handle_user_connect(self, message):
+        self.raise_unhandled_warning()
+
+    def handle_user_name_change(self, message):
+        self.raise_unhandled_warning()
+
+    def handle_user_disconnect(self, message):
+        self.raise_unhandled_warning()
+
     def handle_error(self, message):
         self.raise_unhandled_warning()

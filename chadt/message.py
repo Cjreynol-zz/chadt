@@ -26,11 +26,37 @@ class Message:
         self.version = version
         self.message_type = MessageType(message_type)
 
-    def display_string(self):
+    def get_display_string(self):
+        value = ""
+        if self.message_type == MessageType.TEXT:
+            value = self.text_to_str()
+        elif self.message_type == MessageType.USER_CONNECT:
+            value = self.connect_to_str()
+        elif self.message_type == MessageType.USER_NAME_CHANGE:
+            value = self.name_change_to_str()
+        elif self.message_type == MessageType.USER_DISCONNECT:
+            value = self.disconnect_to_str()
+        else:
+            value = self.__str__()
+        return value
+    
+    def text_to_str(self):
         to = ""
         if self.recipient != ALL_NAME:
             to = "(to {})".format(self.recipient)
         return self.sender + to + ":  " + self.message_text
+
+    def connect_to_str(self):
+        username = self.message_text
+        return username + " connected"
+
+    def name_change_to_str(self):
+        old, new = self.message_text.split(',')
+        return old + " changed username to " + new
+    
+    def disconnect_to_str(self):
+        username = self.message_text
+        return username + " disconnected"
 
     def __str__(self):
         return self.sender + ":" + str(self.message_type)

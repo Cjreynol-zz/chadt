@@ -12,6 +12,9 @@ class MessageType(Enum):
     TEMP_USERNAME_ASSIGNED = 23
 
     LIST_OF_USERS = 30
+    USER_CONNECT = 31
+    USER_NAME_CHANGE = 32
+    USER_DISCONNECT = 33
     
     ERROR = 90
 
