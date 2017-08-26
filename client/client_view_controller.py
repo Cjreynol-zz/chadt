@@ -14,6 +14,7 @@ class ClientViewController(ViewController):
 
     def start_controller(self):
         self.setup_config_view()
+        self.start()
 
     def confirm_button(self, server_host_entry, server_port_entry):
         def f():
@@ -42,16 +43,8 @@ class ClientViewController(ViewController):
         self.view.add_quit_function(self.quit)
 
     def create_client(self, server_host, server_port):
-        self.client = Client(server_host, server_port)
-        self.client.add_message_in_queue_observer(self.display_new_text_message)
-        self.client.add_connected_users_observer(self.update_list_of_users)
-        self.client.set_username_rejected_observer(self.respond_to_rejected_username)
-        self.client.set_shutdown_observer(self.respond_to_shutdown)
+        self.client = Client(server_host, server_port, self.system_message_queue)
         self.client.start_client()
-
-    def display_new_text_message(self, message_queue):
-        message = message_queue.pop(0)
-        self.view.display_new_text_message(message.get_display_string())
 
     def send_message_button(self, message_entry):
         def f(event = None):
@@ -64,6 +57,7 @@ class ClientViewController(ViewController):
         if self.client is not None:
             self.client.shutdown_client()
         self.view.quit()
+        self.shutdown()
 
     def send_username_button(self, username_entry):
         def f(event = None):
@@ -79,12 +73,16 @@ class ClientViewController(ViewController):
                 
         return f
 
-    def update_list_of_users(self, user_list):
-        self.view.update_list_of_users(user_list)
+    def handle_text(self, message):
+        self.view.display_new_text_message(message.text)
 
-    def respond_to_rejected_username(self):
+    def handle_user_list_update(self, message):
+        self.view.update_list_of_users(self.client.connected_users)
+        self.view.display_new_text_message(message.text)
+
+    def handle_username_rejected(self, message):
         self.view.warning_message("Username Rejected", "Username requested was rejected by the server.")
 
-    def respond_to_shutdown(self):
+    def handle_shutdown(self, message):
         self.view.warning_message("Server Shutdown", "Server was shutdown, client shutting down now.")
         self.quit()

@@ -4,8 +4,8 @@ from chadt.connection_handler import ConnectionHandler
 from chadt.constants import DEFAULT_USERNAME_BASE, SERVER_NAME
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
+from chadt.system_message import SystemMessage
 
-from lib.observed_key_list_dict import ObservedKeyListDict
 from lib.observed_list import ObservedList
 
 from server.listener import Listener
@@ -14,12 +14,12 @@ from server.message_relayer import MessageRelayer
 
 class Server(MessageHandler):
     
-    def __init__(self, port):
+    def __init__(self, port, system_message_queue):
         super().__init__()
 
-        self.clients = ObservedKeyListDict()
+        self.clients = dict()
         self.message_out_queue = []
-        self.message_in_queue = ObservedList()
+        self.system_message_queue = system_message_queue
 
         self.connections = ObservedList()
         self.temp_id_counter = 0
@@ -53,11 +53,9 @@ class Server(MessageHandler):
         super().shutdown()
         log.info("Server shut down.")
     
-    def add_client_list_observer(self, observer):
-        self.clients.add_observer(observer)
-
     def handle_text(self, message):
-        self.message_in_queue.append(message)
+        system_message = SystemMessage.construct_text(message.get_display_string())
+        self.system_message_queue.append(system_message)
         self.message_out_queue.append(message)
 
     def handle_disconnect(self, message):
@@ -82,26 +80,23 @@ class Server(MessageHandler):
         response_message = message_constructor(username, SERVER_NAME, recipient)
         self.clients[recipient].add_message_to_out_queue(response_message)
 
-    def add_message_in_queue_observer(self, observer):
-        self.message_in_queue.add_observer(observer)
-
     def add_connection_queue_observer(self, observer):
         self.connections.add_observer(observer)
 
     def send_username_change(self, old_username, new_username):
         message_text = old_username + "," + new_username
         username_change_message = Message.construct_user_name_change(message_text, SERVER_NAME)
-        self.message_in_queue.append(username_change_message)
+        self.send_system_message_user_update(username_change_message)
         self.message_out_queue.append(username_change_message)
 
     def send_user_connect(self, username):
         user_connect_message = Message.construct_user_connect(username, SERVER_NAME)
-        self.message_in_queue.append(user_connect_message)
+        self.send_system_message_user_update(user_connect_message)
         self.message_out_queue.append(user_connect_message)
 
     def send_user_disconnect(self, username):
         user_disconnect_message = Message.construct_user_disconnect(username, SERVER_NAME)
-        self.message_in_queue.append(user_disconnect_message)
+        self.send_system_message_user_update(user_disconnect_message)
         self.message_out_queue.append(user_disconnect_message)
 
     def get_next_temp_id(self):
@@ -125,3 +120,7 @@ class Server(MessageHandler):
 
         self.clients[username].start()
         self.send_user_connect(username)
+
+    def send_system_message_user_update(self, message):
+        system_message = SystemMessage.construct_user_list_update(message.get_display_string())
+        self.system_message_queue.append(system_message)

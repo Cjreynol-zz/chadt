@@ -36,6 +36,8 @@ class Message:
             value = self.name_change_to_str()
         elif self.message_type == MessageType.USER_DISCONNECT:
             value = self.disconnect_to_str()
+        elif self.message_type == MessageType.LIST_OF_USERS:
+            value = self.list_to_str()
         else:
             value = self.__str__()
         return value
@@ -57,6 +59,10 @@ class Message:
     def disconnect_to_str(self):
         username = self.message_text
         return username + " disconnected"
+
+    def list_to_str(self):
+        user_list = self.message_text.replace(",", ", ")
+        return "Now connected to:  " + user_list
 
     def __str__(self):
         return self.sender + ":" + str(self.message_type)

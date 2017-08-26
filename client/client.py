@@ -6,27 +6,23 @@ from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameT
 from chadt.constants import SERVER_NAME
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
-
-from lib.observed_list import ObservedList
+from chadt.system_message import SystemMessage
 
 
 class Client(MessageHandler):
 
-    def __init__(self, server_host, server_port):
+    def __init__(self, server_host, server_port, system_message_queue):
         super().__init__()
 
         self.username = ""
         self.username_stable = False
 
-        self.message_in_queue = ObservedList()
         self.message_out_queue = []
-        self.connected_users = ObservedList()
+        self.connected_users = []
+        self.system_message_queue = system_message_queue
 
         connection = Connection(server_port, server_host)
         self.server_connection = ConnectionHandler(self.username, connection, self.message_processing_queue, self.message_out_queue)
-
-        self.shutdown_observer = None
-        self.username_rejected_observer = None
 
         log.info("Client created.")
 
@@ -53,20 +49,13 @@ class Client(MessageHandler):
         else:
             raise UsernameCurrentlyUnstableException()
 
-    def add_message_in_queue_observer(self, observer):
-        self.message_in_queue.add_observer(observer)
-
-    def add_connected_users_observer(self, observer):
-        self.connected_users.add_observer(observer)
-
     def handle_text(self, message):
-        self.message_in_queue.append(message)
+        system_message = SystemMessage.construct_text(message.get_display_string())
+        self.system_message_queue.append(system_message)
 
     def handle_disconnect(self, message):
-        if self.shutdown_observer is not None:
-            self.shutdown_observer()
-        else:
-            self.shutdown_client()
+        system_message = SystemMessage.construct_shutdown(message.get_display_string())
+        self.system_message_queue.append(system_message)
 
     def handle_username_accepted(self, message):
         username = message.message_text
@@ -79,30 +68,36 @@ class Client(MessageHandler):
 
     def handle_username_rejected(self, message):
         self.username_stable = True
-        if self.username_rejected_observer is not None:
-            self.username_rejected_observer()
+        system_message = SystemMessage.construct_username_rejected(message.get_display_string())
+        self.system_message_queue.append(system_message)
 
     def handle_temp_username_assigned(self, message):
         self.handle_username_accepted(message)
 
     def handle_list_of_users(self, message):
         list_of_users = message.message_text.split(',')
-        self.connected_users.merge(list_of_users)
+        self.connected_users  = self.connected_users + list_of_users
+        self.send_system_message_user_update(message)
 
     def handle_user_connect(self, message):
         username = message.message_text
         self.connected_users.append(username)
-        self.message_in_queue.append(message)
+        self.send_system_message_user_update(message)
 
     def handle_user_name_change(self, message):
         old, new = message.message_text.split(',')
-        self.connected_users.replace(old, new)
-        self.message_in_queue.append(message)
+
+        # replace new username in the same index, preserving order
+        index = self.connected_users.index(old)
+        self.connected_users.pop(index)
+        self.connected_users.insert(index, new)
+
+        self.send_system_message_user_update(message)
 
     def handle_user_disconnect(self, message):
         username = message.message_text
         self.connected_users.remove(username)
-        self.message_in_queue.append(message)
+        self.send_system_message_user_update(message)
 
     def send_username_request(self, username):
         if self.is_username_valid_length(username):
@@ -111,8 +106,6 @@ class Client(MessageHandler):
         else:
             raise UsernameTooLongException()
 
-    def set_username_rejected_observer(self, observer):
-        self.username_rejected_observer = observer
-
-    def set_shutdown_observer(self, observer):
-        self.shutdown_observer = observer
+    def send_system_message_user_update(self, message):
+        system_message = SystemMessage.construct_user_list_update(message.get_display_string())
+        self.system_message_queue.append(system_message)

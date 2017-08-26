@@ -13,6 +13,7 @@ class ServerViewController(ViewController):
 
     def start_controller(self):
         self.setup_config_view()
+        self.start()
 
     def setup_config_view(self):
         self.view = ServerConfigView()
@@ -38,19 +39,18 @@ class ServerViewController(ViewController):
         return f
 
     def create_server(self, port_num):
-        self.server = Server(port_num)
-        self.server.add_client_list_observer(self.client_list_update)
-        self.server.add_message_in_queue_observer(self.display_new_text_message)
+        self.server = Server(port_num, self.system_message_queue)
         self.server.start_server()
-
-    def client_list_update(self):
-        self.view.update_list_box(self.server.clients.keys())
 
     def quit(self):
         if self.server is not None:
             self.server.shutdown_server()
         self.view.quit()
+        self.shutdown()
 
-    def display_new_text_message(self, message_queue):
-        message = message_queue.pop(0)
-        self.view.display_new_text_message(message.get_display_string())
+    def handle_text(self, message):
+        self.view.display_new_text_message(message.text)
+
+    def handle_user_list_update(self, message):
+        self.view.update_list_box(self.server.clients.keys())
+        self.view.display_new_text_message(message.text)
