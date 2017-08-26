@@ -8,7 +8,21 @@ class SystemMessageProcessor(Component):
         self.system_message_queue = system_message_queue
         self.system_message_handler = system_message_handler
 
+        self.lookup = self._create_conditional()
+
         super().__init__()
+
+    def _create_conditional(self):
+        ifelse = dict()
+
+        for m_type in SystemMessageType:
+            function_name = self._get_func_name(m_type)
+            ifelse[m_type] = getattr(self.system_message_handler, function_name)
+
+        return ifelse
+            
+    def _get_func_name(self, m_type):
+        return "handle_" + str(m_type).lower()
 
     def start(self):
         super().start(self.process_system_messages)
@@ -19,13 +33,7 @@ class SystemMessageProcessor(Component):
             self.process_system_message(message)
 
     def process_system_message(self, message):
-        if message.m_type == SystemMessageType.TEXT:
-            self.system_message_handler.handle_text(message)
-        elif message.m_type == SystemMessageType.USER_LIST_UPDATE:
-            self.system_message_handler.handle_user_list_update(message)
-        elif message.m_type == SystemMessageType.USERNAME_REJECTED:
-            self.system_message_handler.handle_username_rejected(message)
-        elif message.m_type == SystemMessageType.SHUTDOWN:
-            self.system_message_handler.handle_shutdown(message)
-        else:
+        try:
+            self.lookup[message.m_type](message)
+        except KeyError:
             raise RuntimeError("Unexpected system message type of {}".format(message.m_type))

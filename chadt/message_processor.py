@@ -6,13 +6,26 @@ from chadt.message_type import MessageType
 
 
 class MessageProcessor(Component):
-
     
     def __init__(self, message_processing_queue, message_handler):
         self.message_processing_queue = message_processing_queue
         self.message_handler = message_handler
+
+        self.lookup = self._create_conditional()
         
         super().__init__()
+
+    def _create_conditional(self):
+        ifelse = dict()
+
+        for m_type in MessageType:
+            function_name = self._get_func_name(m_type)
+            ifelse[m_type] = getattr(self.message_handler, function_name)
+
+        return ifelse
+            
+    def _get_func_name(self, m_type):
+        return "handle_" + str(m_type).lower()
 
     def start(self):
         super().start(self.process_messages)
@@ -23,27 +36,7 @@ class MessageProcessor(Component):
             self.process_message(message)
 
     def process_message(self, message):
-        if message.message_type == MessageType.TEXT:
-            self.message_handler.handle_text(message)
-        elif message.message_type == MessageType.DISCONNECT:
-            self.message_handler.handle_disconnect(message)
-        elif message.message_type == MessageType.USERNAME_REQUEST:
-            self.message_handler.handle_username_request(message)
-        elif message.message_type == MessageType.USERNAME_ACCEPTED:
-            self.message_handler.handle_username_accepted(message)
-        elif message.message_type == MessageType.USERNAME_REJECTED:
-            self.message_handler.handle_username_rejected(message)
-        elif message.message_type == MessageType.TEMP_USERNAME_ASSIGNED:
-            self.message_handler.handle_temp_username_assigned(message)
-        elif message.message_type == MessageType.LIST_OF_USERS:
-            self.message_handler.handle_list_of_users(message)
-        elif message.message_type == MessageType.USER_CONNECT:
-            self.message_handler.handle_user_connect(message)
-        elif message.message_type == MessageType.USER_NAME_CHANGE:
-            self.message_handler.handle_user_name_change(message)
-        elif message.message_type == MessageType.USER_DISCONNECT:
-            self.message_handler.handle_user_disconnect(message)
-        elif message.message_type == MessageType.ERROR:
-            self.message_handler.handle_error(message)
-        else:
+        try:
+            self.lookup[message.message_type](message)
+        except KeyError:
             raise RuntimeError("Unexpected message type of {}.".format(message.message_type))

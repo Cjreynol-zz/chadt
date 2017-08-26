@@ -2,6 +2,7 @@ from warnings import warn
 
 from chadt.constants import SENDER_MAX_LENGTH
 from chadt.message_processor import MessageProcessor
+from chadt.message_type import MessageType
 
 
 class MessageHandler:
@@ -22,38 +23,17 @@ class MessageHandler:
     def is_username_valid_length(self, username):
         return len(username) <= SENDER_MAX_LENGTH
 
-    def raise_unhandled_warning(self):
+    @staticmethod
+    def raise_unhandled_warning():
         warn("Unhandled message type.")
 
-    def handle_text(self, message):
-        self.raise_unhandled_warning()
 
-    def handle_disconnect(self, message):
-        self.raise_unhandled_warning()
+def add_method(m_type):
+    method_name = "handle_" + str(m_type).lower()
+    def f(cls, message):
+        MessageHandler.raise_unhandled_warning()
         
-    def handle_username_request(self, message):
-        self.raise_unhandled_warning()
-        
-    def handle_username_accepted(self, message):
-        self.raise_unhandled_warning()
+    setattr(MessageHandler, method_name, classmethod(f))
 
-    def handle_username_rejected(self, message):
-        self.raise_unhandled_warning()
-
-    def handle_temp_username_assigned(self, message):
-        self.raise_unhandled_warning()
-
-    def handle_list_of_users(self, message):
-        self.raise_unhandled_warning()
-
-    def handle_user_connect(self, message):
-        self.raise_unhandled_warning()
-
-    def handle_user_name_change(self, message):
-        self.raise_unhandled_warning()
-
-    def handle_user_disconnect(self, message):
-        self.raise_unhandled_warning()
-
-    def handle_error(self, message):
-        self.raise_unhandled_warning()
+for m_type in MessageType:
+    add_method(m_type)
