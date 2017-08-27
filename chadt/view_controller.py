@@ -10,9 +10,6 @@ class ViewController(SystemMessageHandler):
         super().__init__()
         self.view = None
 
-    def assign_view(self, view):
-        self.view = view
-
     def is_valid_port_num(self, num):
         return_value = True
         try:
@@ -25,4 +22,8 @@ class ViewController(SystemMessageHandler):
         return return_value
 
     def quit(self):
-        raise NotImplementedError("Needs to be implemented.")
+        self.view.quit()
+        self.shutdown()
+
+    def handle_text(self, message):
+        self.view.display_new_text_message(message.text)

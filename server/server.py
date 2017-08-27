@@ -34,7 +34,7 @@ class Server(MessageHandler):
         self.message_relayer.start()
         super().start()
 
-        self.add_connection_queue_observer(self.add_new_client)
+        self.connections.add_observer(self._add_new_client)
         log.info("Server started.")
 
     def stop_server(self):
@@ -62,7 +62,7 @@ class Server(MessageHandler):
         username = message.sender
         self.clients[username].shutdown()
         del self.clients[username]
-        self.send_user_disconnect(username)
+        self._send_user_disconnect(username)
 
     def handle_username_request(self, message):
         username = message.message_text
@@ -72,7 +72,7 @@ class Server(MessageHandler):
         if username not in self.clients and self.is_username_valid_length(username):
             self.clients[username] = self.clients.pop(message.sender)
             self.clients[username].username = username
-            self.send_username_change(message.sender, username)
+            self._send_username_change(message.sender, username)
         else:
             message_constructor = Message.construct_username_rejected
             recipient = message.sender
@@ -80,33 +80,14 @@ class Server(MessageHandler):
         response_message = message_constructor(username, SERVER_NAME, recipient)
         self.clients[recipient].add_message_to_out_queue(response_message)
 
-    def add_connection_queue_observer(self, observer):
-        self.connections.add_observer(observer)
-
-    def send_username_change(self, old_username, new_username):
-        message_text = old_username + "," + new_username
-        username_change_message = Message.construct_user_name_change(message_text, SERVER_NAME)
-        self.send_system_message_user_update(username_change_message)
-        self.message_out_queue.append(username_change_message)
-
-    def send_user_connect(self, username):
-        user_connect_message = Message.construct_user_connect(username, SERVER_NAME)
-        self.send_system_message_user_update(user_connect_message)
-        self.message_out_queue.append(user_connect_message)
-
-    def send_user_disconnect(self, username):
-        user_disconnect_message = Message.construct_user_disconnect(username, SERVER_NAME)
-        self.send_system_message_user_update(user_disconnect_message)
-        self.message_out_queue.append(user_disconnect_message)
-
-    def get_next_temp_id(self):
+    def _get_next_temp_id(self):
         username = DEFAULT_USERNAME_BASE + str(self.temp_id_counter)
         self.temp_id_counter += 1
         return username
 
-    def add_new_client(self, connection_list):
+    def _add_new_client(self, connection_list):
         connection = connection_list.pop(0)
-        username = self.get_next_temp_id()
+        username = self._get_next_temp_id()
         current_users = ",".join(self.clients.keys())
 
         self.clients[username] = ConnectionHandler(username, connection, self.message_processing_queue, is_server_connection = True)
@@ -119,8 +100,24 @@ class Server(MessageHandler):
             self.clients[username].add_message_to_out_queue(previous_users_message)
 
         self.clients[username].start()
-        self.send_user_connect(username)
+        self._send_user_connect(username)
 
-    def send_system_message_user_update(self, message):
+    def _send_username_change(self, old_username, new_username):
+        message_text = old_username + "," + new_username
+        username_change_message = Message.construct_user_name_change(message_text, SERVER_NAME)
+        self._send_system_message_user_update(username_change_message)
+        self.message_out_queue.append(username_change_message)
+
+    def _send_user_connect(self, username):
+        user_connect_message = Message.construct_user_connect(username, SERVER_NAME)
+        self._send_system_message_user_update(user_connect_message)
+        self.message_out_queue.append(user_connect_message)
+
+    def _send_user_disconnect(self, username):
+        user_disconnect_message = Message.construct_user_disconnect(username, SERVER_NAME)
+        self._send_system_message_user_update(user_disconnect_message)
+        self.message_out_queue.append(user_disconnect_message)
+
+    def _send_system_message_user_update(self, message):
         system_message = SystemMessage.construct_user_list_update(message.get_display_string())
         self.system_message_queue.append(system_message)

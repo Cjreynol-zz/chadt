@@ -26,10 +26,10 @@ class ClientChatView(View):
         self.send_username_button = None
         self.user_list = None
 
-        self.initialize_widgets()
-        self.place_widgets()
+        self._initialize_widgets()
+        self._place_widgets()
 
-    def initialize_widgets(self):
+    def _initialize_widgets(self):
         self.chat_window = Text(self.root, height = self.CHAT_HEIGHT, width = self.CHAT_WIDTH)
         self.chat_window.bind("<Key>", lambda x: "break") 
         # this^ bind effectively makes the text widget read-only
@@ -49,7 +49,7 @@ class ClientChatView(View):
         
         self.user_list = Listbox(self.root)
 
-    def place_widgets(self):
+    def _place_widgets(self):
         self.chat_window.grid(row = 0, column = 0)
         self.message_entry.grid(row = 2, column = 0)
         self.send_message_button.grid(row = 2, column = 1)
@@ -64,6 +64,7 @@ class ClientChatView(View):
     def set_username_entry_button_commands(self, callback_generator):
         self.username_entry.bind("<Return>", callback_generator(self.username_entry))
         self.send_username_button["command"] = callback_generator(self.username_entry)
+
     def display_new_text_message(self, message):
         self.chat_window.insert(END, message+"\n")
         self.chat_window.see(END)
@@ -76,7 +77,7 @@ class ClientChatView(View):
 
     def update_list_of_users(self, new_user_list):
         self.user_list.delete(0,  END)
-        # all added for private messages purposes
+        # all added for private messaging purposes
         self.user_list.insert(0, self.MESSAGE_ALL_USER)
         for user in new_user_list:
             self.user_list.insert(END, user)
@@ -86,6 +87,7 @@ class ClientChatView(View):
         index = 0
         if selected != ():
             index = selected
+
         recipient = self.user_list.get(index)
         if recipient == self.MESSAGE_ALL_USER:
             recipient = ALL_NAME

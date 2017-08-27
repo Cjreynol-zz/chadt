@@ -18,10 +18,10 @@ class ServerRunningView(View):
         self.chat_log = None
         self.chat_scroll = None
 
-        self.initialize_widgets()
-        self.place_widgets()
+        self._initialize_widgets()
+        self._place_widgets()
 
-    def initialize_widgets(self):
+    def _initialize_widgets(self):
         self.label = Label(self.root, text = self.LABEL_TEXT)
 
         self.user_list = Listbox(self.root)
@@ -33,7 +33,7 @@ class ServerRunningView(View):
         self.chat_scroll = Scrollbar(self.root, command=self.chat_log.yview)
         self.chat_log["yscrollcommand"] = self.chat_scroll.set
 
-    def place_widgets(self):
+    def _place_widgets(self):
         self.label.grid(row = 0, column = 0)
         self.user_list.grid(row = 1, column = 0)
         self.chat_log.grid(row = 1, column = 1)

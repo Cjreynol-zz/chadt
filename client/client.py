@@ -1,8 +1,8 @@
 import logging as log
 
+from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameTooLongException
 from chadt.connection import Connection
 from chadt.connection_handler import ConnectionHandler
-from chadt.chadt_exceptions import UsernameCurrentlyUnstableException, UsernameTooLongException
 from chadt.constants import SERVER_NAME
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
@@ -42,6 +42,13 @@ class Client(MessageHandler):
         super().shutdown()
         log.info("Client shut down.")
 
+    def send_username_request(self, username):
+        if self.is_username_valid_length(username):
+            self.add_message_to_out_queue(username, SERVER_NAME, Message.construct_username_request)
+            self.username_stable = False
+        else:
+            raise UsernameTooLongException()
+
     def add_message_to_out_queue(self, message_text, recipient, message_constructor = Message.construct_text):
         if self.username_stable:
             message = message_constructor(message_text, self.username, recipient)
@@ -77,12 +84,12 @@ class Client(MessageHandler):
     def handle_list_of_users(self, message):
         list_of_users = message.message_text.split(',')
         self.connected_users  = self.connected_users + list_of_users
-        self.send_system_message_user_update(message)
+        self._send_system_message_user_update(message)
 
     def handle_user_connect(self, message):
         username = message.message_text
         self.connected_users.append(username)
-        self.send_system_message_user_update(message)
+        self._send_system_message_user_update(message)
 
     def handle_user_name_change(self, message):
         old, new = message.message_text.split(',')
@@ -92,20 +99,13 @@ class Client(MessageHandler):
         self.connected_users.pop(index)
         self.connected_users.insert(index, new)
 
-        self.send_system_message_user_update(message)
+        self._send_system_message_user_update(message)
 
     def handle_user_disconnect(self, message):
         username = message.message_text
         self.connected_users.remove(username)
-        self.send_system_message_user_update(message)
+        self._send_system_message_user_update(message)
 
-    def send_username_request(self, username):
-        if self.is_username_valid_length(username):
-            self.add_message_to_out_queue(username, SERVER_NAME, Message.construct_username_request)
-            self.username_stable = False
-        else:
-            raise UsernameTooLongException()
-
-    def send_system_message_user_update(self, message):
+    def _send_system_message_user_update(self, message):
         system_message = SystemMessage.construct_user_list_update(message.get_display_string())
         self.system_message_queue.append(system_message)
