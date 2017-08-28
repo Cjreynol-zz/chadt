@@ -38,7 +38,7 @@ class Connection:
         self.socket.sendall(bytes_message)
         
     def receive_message(self):
-        bytes_message = self._receive_message_bytes()
+        bytes_message = self._receive_message_bytes(self.socket)
         message = self._bytes_to_message(bytes_message)
         return message
 
@@ -59,19 +59,19 @@ class Connection:
     def _close_socket(self):
         self.socket.close()
 
-    def _receive_message_bytes(self):
-        bytes_header = self.socket.recv(Message.HEADER_LENGTH)
+    def _receive_message_bytes(self, socket):
+        bytes_header = socket.recv(Message.HEADER_LENGTH)
         if len(bytes_header) == 0:
             raise ZeroLengthMessageException()
         _, _, _, _, length = self._decode_header(bytes_header)
-        bytes_message_text = self.socket.recv(length)
+        bytes_message_text = socket.recv(length)
         return bytes_header + bytes_message_text
     
     def _bytes_to_message(self, byte_array):
         unpacked_tuple = self._decode_header(byte_array)
         version, message_type, sender, recipient, length = unpacked_tuple
-        message_text = byte_array[Message.HEADER_LENGTH:]
-        return Message(message_text.decode(), sender.decode().rstrip(), recipient.decode().rstrip(), message_type, version)
+        text = byte_array[Message.HEADER_LENGTH:]
+        return Message(text.decode(), sender.decode().rstrip(), recipient.decode().rstrip(), message_type, version)
 
     def _decode_header(self, byte_array):
         unpacked_tuple = unpack("BB" + str(SENDER_MAX_LENGTH) + "s" + str(RECIPIENT_MAX_LENGTH) + "sH", byte_array[:Message.HEADER_LENGTH])
@@ -79,5 +79,5 @@ class Connection:
 
     def _make_bytes(self, message):
         pack_string = "BB" + str(SENDER_MAX_LENGTH) + "s" + str(RECIPIENT_MAX_LENGTH) + "sH" + str(message.length) + "s"
-        data = pack(pack_string, message.version, int(message.message_type), bytes(message.sender.ljust(SENDER_MAX_LENGTH), "utf-8"), bytes(message.recipient.ljust(RECIPIENT_MAX_LENGTH), "utf-8"), message.length, bytes(message.message_text, "utf-8"))
+        data = pack(pack_string, message.version, int(message.message_type), bytes(message.sender.ljust(SENDER_MAX_LENGTH), "utf-8"), bytes(message.recipient.ljust(RECIPIENT_MAX_LENGTH), "utf-8"), message.length, bytes(message.text, "utf-8"))
         return data

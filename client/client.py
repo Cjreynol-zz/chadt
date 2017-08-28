@@ -6,13 +6,14 @@ from chadt.connection_handler import ConnectionHandler
 from chadt.constants import SERVER_NAME
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
+from chadt.message_type import MessageType
 from chadt.system_message import SystemMessage
 
 
 class Client(MessageHandler):
 
     def __init__(self, server_host, server_port, system_message_queue):
-        super().__init__()
+        super().__init__(MessageType)
 
         self.username = ""
         self.username_stable = False
@@ -49,9 +50,9 @@ class Client(MessageHandler):
         else:
             raise UsernameTooLongException()
 
-    def add_message_to_out_queue(self, message_text, recipient, message_constructor = Message.construct_text):
+    def add_message_to_out_queue(self, text, recipient, message_constructor = Message.construct_text):
         if self.username_stable:
-            message = message_constructor(message_text, self.username, recipient)
+            message = message_constructor(text, self.username, recipient)
             self.message_out_queue.append(message)
         else:
             raise UsernameCurrentlyUnstableException()
@@ -65,7 +66,7 @@ class Client(MessageHandler):
         self.system_message_queue.append(system_message)
 
     def handle_username_accepted(self, message):
-        username = message.message_text
+        username = message.text
         if self.is_username_valid_length(username):
             self.username = username
             self.server_connection.username = username
@@ -82,17 +83,17 @@ class Client(MessageHandler):
         self.handle_username_accepted(message)
 
     def handle_list_of_users(self, message):
-        list_of_users = message.message_text.split(',')
+        list_of_users = message.text.split(',')
         self.connected_users  = self.connected_users + list_of_users
         self._send_system_message_user_update(message)
 
     def handle_user_connect(self, message):
-        username = message.message_text
+        username = message.text
         self.connected_users.append(username)
         self._send_system_message_user_update(message)
 
     def handle_user_name_change(self, message):
-        old, new = message.message_text.split(',')
+        old, new = message.text.split(',')
 
         # replace new username in the same index, preserving order
         index = self.connected_users.index(old)
@@ -102,7 +103,7 @@ class Client(MessageHandler):
         self._send_system_message_user_update(message)
 
     def handle_user_disconnect(self, message):
-        username = message.message_text
+        username = message.text
         self.connected_users.remove(username)
         self._send_system_message_user_update(message)
 

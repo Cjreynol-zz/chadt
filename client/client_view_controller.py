@@ -60,7 +60,7 @@ class ClientViewController(ViewController):
         return f
 
     def _create_client(self, server_host, server_port):
-        self.client = Client(server_host, server_port, self.system_message_queue)
+        self.client = Client(server_host, server_port, self.message_processing_queue)
         self.client.start_client()
 
     def _send_message_button(self, message_entry):

@@ -1,13 +1,14 @@
-from chadt.system_message_handler import SystemMessageHandler
+from chadt.message_handler import MessageHandler
+from chadt.system_message_type import SystemMessageType
 
 
-class ViewController(SystemMessageHandler):
+class ViewController(MessageHandler):
 
     MIN_PORT = 0
     MAX_PORT = 65535
     
     def __init__(self):
-        super().__init__()
+        super().__init__(SystemMessageType)
         self.view = None
 
     def is_valid_port_num(self, num):

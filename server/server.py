@@ -4,6 +4,7 @@ from chadt.connection_handler import ConnectionHandler
 from chadt.constants import DEFAULT_USERNAME_BASE, SERVER_NAME
 from chadt.message import Message
 from chadt.message_handler import MessageHandler
+from chadt.message_type import MessageType
 from chadt.system_message import SystemMessage
 
 from lib.observed_list import ObservedList
@@ -15,7 +16,7 @@ from server.message_relayer import MessageRelayer
 class Server(MessageHandler):
     
     def __init__(self, port, system_message_queue):
-        super().__init__()
+        super().__init__(MessageType)
 
         self.clients = dict()
         self.message_out_queue = []
@@ -65,7 +66,7 @@ class Server(MessageHandler):
         self._send_user_disconnect(username)
 
     def handle_username_request(self, message):
-        username = message.message_text
+        username = message.text
         message_constructor = Message.construct_username_accepted
         recipient = username
 
@@ -103,8 +104,8 @@ class Server(MessageHandler):
         self._send_user_connect(username)
 
     def _send_username_change(self, old_username, new_username):
-        message_text = old_username + "," + new_username
-        username_change_message = Message.construct_user_name_change(message_text, SERVER_NAME)
+        text = old_username + "," + new_username
+        username_change_message = Message.construct_user_name_change(text, SERVER_NAME)
         self._send_system_message_user_update(username_change_message)
         self.message_out_queue.append(username_change_message)
 

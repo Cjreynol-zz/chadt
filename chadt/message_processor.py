@@ -2,23 +2,22 @@ from struct import pack, unpack
 
 from chadt.component import Component
 from chadt.chadt_exceptions import ZeroLengthMessageException
-from chadt.message_type import MessageType
 
 
 class MessageProcessor(Component):
     
-    def __init__(self, message_processing_queue, message_handler):
+    def __init__(self, message_processing_queue, message_handler, type_enum):
         self.message_processing_queue = message_processing_queue
         self.message_handler = message_handler
 
-        self.lookup = self._create_conditional()
+        self.lookup = self._create_conditional(type_enum)
         
         super().__init__()
 
-    def _create_conditional(self):
+    def _create_conditional(self, type_enum):
         ifelse = dict()
 
-        for m_type in MessageType:
+        for m_type in type_enum:
             function_name = self._get_func_name(m_type)
             ifelse[m_type] = getattr(self.message_handler, function_name)
 

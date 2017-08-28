@@ -3,9 +3,9 @@ from chadt.system_message_type import SystemMessageType
 
 class SystemMessage:
     
-    def __init__(self, text, m_type = SystemMessageType.TEXT):
+    def __init__(self, text, message_type = SystemMessageType.TEXT):
         self.text = text
-        self.m_type = m_type
+        self.message_type = message_type
 
 
 # dynamically add static constructor functions to SystemMessage based on 

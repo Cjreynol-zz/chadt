@@ -49,5 +49,5 @@ class ServerViewController(ViewController):
         return f
 
     def _create_server(self, port_num):
-        self.server = Server(port_num, self.system_message_queue)
+        self.server = Server(port_num, self.message_processing_queue)
         self.server.start_server()
