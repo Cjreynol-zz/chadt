@@ -2,6 +2,13 @@ from enum import Enum
 
 
 class MessageType(Enum):
+    """Represents the different messages sent between server and clients.
+
+    Each grouping is a class of related messages that are used to provide 
+    certain functionality to the clients or server.
+
+    """
+
     TEXT = 1
 
     DISCONNECT = 11

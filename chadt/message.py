@@ -17,7 +17,6 @@ class Message:
         text - length
 
     """
-        
 
     HEADER_LENGTH = 1 + 1 + 16 + 16 + 2
 
@@ -103,7 +102,7 @@ class Message:
         
 
 def add_message_func(m_type):
-    """Adds static constructor function to Message based on m_type passed."""
+    """Adds static constructor to Message based on m_type passed."""
     def f(text, sender, recipient = ALL_NAME):
         return Message(text, sender, recipient, m_type)
     func_name = "construct_" + str(m_type).lower()
