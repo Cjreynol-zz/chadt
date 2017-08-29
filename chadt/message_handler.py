@@ -29,7 +29,7 @@ class MessageHandler:
         return len(username) <= SENDER_MAX_LENGTH
 
     def raise_unhandled_warning(self, message):
-        warn("Unhandled message type {}.".format(str(messsage)))
+        warn("Unhandled message type {}.".format(str(message)))
 
     def _add_method(self, m_type):
         method_name = "handle_" + str(m_type).lower()
