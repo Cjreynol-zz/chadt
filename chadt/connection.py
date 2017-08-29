@@ -16,7 +16,6 @@ class Connection:
         self.socket = connected_socket
         if self.socket is None:
             self.socket = socket()
-        self._set_socket_options()
 
         self.status = ConnectionStatus.UNINITIALIZED
 
@@ -26,6 +25,7 @@ class Connection:
                 self._connect_socket(self.server_host, self.port)
             elif self.port is not None:
                 self._start_listening_socket(self.port)
+            self._set_socket_options()
             self.status = ConnectionStatus.CONNECTED
 
     def shutdown(self):
